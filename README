@@ -8,6 +8,11 @@ enviroments:
     pip install -r requirements.txt
 '''
 
+download imdb/wiki dataset:
+ wiki: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar
+ imdb: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar
+ then extract those data to the "./dataset/"
+
 preprocess:
     python preproccessing/dataset_proc.py
 
