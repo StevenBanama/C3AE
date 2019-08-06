@@ -21,7 +21,7 @@
 
 
 ## DETECT: 
-   [mtcnn](https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
+   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align
 
 
 origin==paper, our == ourtesting
