@@ -1,0 +1,26 @@
+# C3AE
+#
+#[ https://arxiv.org/abs/1904.05059 ] orgin pdf
+
+enviroments:
+   numpy, tensorflow(1.8), pandas, feather, opencv
+'''
+    pip install -r requirements.txt
+'''
+
+preprocess:
+    python preproccessing/dataset_proc.py
+
+training: 
+    python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source wiki 
+
+
+DETECT: 
+   [] mx-mtcnn:  detect and align
+
+
+origin==paper, val == ourtesting
+|dataset|origin|val|
+| -- | -- | -- |
+| -- | wiki | -- |
+| -- | imdb| -- |
