@@ -1,6 +1,6 @@
 # C3AE
 #
-# [ papers] ( https://arxiv.org/abs/1904.05059 )
+# [papers] ( https://arxiv.org/abs/1904.05059 )
 
 ## enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv\
@@ -9,8 +9,8 @@
 ```
 
 ##download imdb/wiki dataset:
- [ wiki ] ( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar)
- [ imdb ] ( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
+ [wiki] ( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar)
+ [imdb] ( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
  then extract those data to the "./dataset/"
 
 ## preprocess:
@@ -21,7 +21,7 @@
 
 
 ## DETECT: 
-   [ mtcnn ] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
+   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
 
 
 origin==paper, our == ourtesting
@@ -39,7 +39,7 @@ origin==paper, our == ourtesting
 | v2 | imdb| XXX |
 
 
-![ params ] (https://github.com/StevenBanama/C3AE/tree/master/assets/params.png)
+![params] (https://github.com/StevenBanama/C3AE/tree/master/assets/params.png)
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
