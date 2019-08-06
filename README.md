@@ -2,6 +2,8 @@
 #
 # [papers] ( https://arxiv.org/abs/1904.05059 )
 
+This is a keras implements of c3ae. welcome to discuss ~ 
+
 ## enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv\
 ```
