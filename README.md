@@ -10,10 +10,10 @@ This is a keras implements of c3ae. welcome to discuss ~
     pip install -r requirements.txt
 ```
 
-## download imdb/wiki dataset:
- [wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar)
- [imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
- then extract those data to the "./dataset/"
+## download imdb/wiki dataset: \\
+ [wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) \\
+ [imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar) \\
+ *download* then *extract* those data to the "./dataset/"
 
 ## preprocess:
     >>> python preproccessing/dataset_proc.py
@@ -48,5 +48,5 @@ origin==paper, our == ourtesting
         we can find the params of conv5 , "1 * 1 * 32", which has 1056 params. The SE(factor=2) has 1024 params, which means \
         conv5 contains SE and 1X1 conv. 
 
-#puzzlement:
+# puzzlement:
    
