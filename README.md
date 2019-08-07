@@ -24,7 +24,7 @@ This is a keras implements of c3ae. welcome to discuss ~
 
 
 ## DETECT: 
-   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
+   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
