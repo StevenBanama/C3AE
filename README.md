@@ -34,7 +34,7 @@ origin==paper
 | from papper | wiki | 6.57 |
 | from papper | imdb| 6.44 |
 
-our == expliting 
+our == Exploring 
 
 |source|dataset|MAE|
 | :--: | :--: | :--: |
