@@ -1,8 +1,6 @@
-# C3AE
-#
-# [papers] ( https://arxiv.org/abs/1904.05059 )
+# [C3AE]( https://arxiv.org/abs/1904.05059 )
 
-This is a keras implements of c3ae. welcome to discuss ~ 
+This is a keras implements of c3ae for age estimation. welcome to discuss ~ 
 
 ## enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv\
