@@ -3,7 +3,7 @@
 This is a keras implements of c3ae for age estimation. welcome to discuss ~ 
 
 ## enviroments:
-   numpy, tensorflow(1.8), pandas, feather, opencv\
+   numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
 ```
     pip install -r requirements.txt
 ```
