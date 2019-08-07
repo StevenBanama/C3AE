@@ -43,7 +43,7 @@ origin==paper, our == ourtesting
 | v2 | imdb| XXX |
 
 
-![params](https://raw.githubusercontent.com/StevenBanama/C3AE/tree/master/assets/params.png)
+![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
