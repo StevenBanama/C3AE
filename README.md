@@ -25,7 +25,7 @@ This is a keras implements of c3ae. welcome to discuss ~
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
-   ![trible box](https://github.com/StevenBanama/C3AE/tree/master/assets/triple_boundbox.png?raw=true)
+   ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
 origin==paper, our == ourtesting
@@ -43,7 +43,7 @@ origin==paper, our == ourtesting
 | v2 | imdb| XXX |
 
 
-![params](https://github.com/StevenBanama/C3AE/tree/master/assets/params.png??raw=true)
+![params](https://raw.githubusercontent.com/StevenBanama/C3AE/tree/master/assets/params.png)
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
