@@ -14,7 +14,8 @@
  then extract those data to the "./dataset/"
 
 ## preprocess:
-    >>> python preproccessing/dataset_proc.py
+    >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki
+    >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
 ## training: 
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source wiki 
@@ -22,6 +23,7 @@
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
+   ![trible box] (https://github.com/StevenBanama/C3AE/tree/master/assets/triple_boundbox.png)
 
 
 origin==paper, our == ourtesting

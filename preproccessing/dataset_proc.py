@@ -19,6 +19,7 @@ from serilize import BaseProc
 from pose import get_rotation_angle
 
 '''
+    save all preprocessing to file with feather format
     所有数据固化传输以feather(), feather文件不能超过2g需要做分片
 '''
 COLUMS = ["age", "gender", "image", "org_box", "trible_box", "landmarks", "roll", "yaw", "pitch"]
@@ -32,6 +33,7 @@ def calc_age(taken, dob):
         return taken - birth.year - 1
 
 def gen_boundbox(box, landmark):
+    # gen trible boundbox
     ymin, xmin, ymax, xmax = map(int, [box[1], box[0], box[3], box[2]])
     w, h = xmax - xmin, ymax - ymin
     nose_x, nose_y = (landmark[2], landmark[2+5])
@@ -101,15 +103,15 @@ class WikiProc(ProfileProc):
             image_path = os.path.join(dirpath, file_name[0])
             image = cv2.imread(image_path, cv2.IMREAD_COLOR)
             try:
-                bounds, lmarks = gen_face(image)
-                crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.4)
+                bounds, lmarks = gen_face(image, image_path)
+                crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.6)  # aligned face with padding 0.4 in papper
                 if len(crops) == 0:
                     raise Exception("no crops~~ %s"%image_path)
-                bounds, lmarks = gen_face(crops[0])
+                bounds, lmarks = gen_face(crops[0], image_path)  # recaculate landmar
                 org_box, first_lmarks = bounds[0], lmarks[0]
                 trible_box = gen_boundbox(org_box, first_lmarks)
-                pitch, yaw, roll = get_rotation_angle(image, first_lmarks)
-                image = crops[0]   # aliagn and replace
+                pitch, yaw, roll = get_rotation_angle(image, first_lmarks) # gen face rotation for filtering
+                image = crops[0]   # select the first align face and replace
             except Exception as ee:
                 logging.info("exception as ee: %s"%ee)
                 trible_box = np.array([])
@@ -149,9 +151,9 @@ class ImdbProc(WikiProc):
 
 
 def test_align():
-     image = cv2.imread("nets/99_1.0.jpg")
+     image = cv2.imread("timg4.jpg")
      bounds, lmarks = gen_face(image)
-     crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.4)
+     crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.6)
      if len(crops) == 0:
          raise Exception("no crops~~ %s"%image_path)
      bounds, lmarks = gen_face(crops[0])
@@ -161,7 +163,37 @@ def test_align():
      print(pitch, yaw, roll)
      cv2.imwrite("test.jpg", crops[0])
 
+def init_parse():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='preprocessing')
+
+    parser.add_argument(
+        '--source', default="wiki", type=str,
+        choices=['wiki', 'imdb'],
+        help='"wiki|imdb" or regrex pattern of feather')
+
+    parser.add_argument(
+        '-d', '--dest', default="./dataset/data/", type=str,
+        help='save_path')
+
+    parser.add_argument(
+        '-i', '--input_path', default="./dataset/wiki_crop", type=str,
+        choices=["./dataset/wiki_crop", "./dataset/imdb_crop"],
+        help='the path of dataset to load')
+
+    parser.add_argument(
+        '-p', '--padding', default=0.6, type=float,
+        help='face padding')
+
+    return parser.parse_args()
+
 if __name__ == "__main__":    
     logging.basicConfig(level=logging.INFO)
-    WikiProc("/data/bin.wen/repos/ry_cv_services/caster/profile/dataset/wiki_crop", "./dataset/data", overwrite=True).process(nums=-1)
-    #ImdbProc("/data/build/dataset/imdb_crop", "./dataset/data",  overwrite=True).process(nums=-1)
+    params = init_parse()
+    if params.source == "wiki":
+        WikiProc(params.input_path, params.dest, overwrite=True).process(nums=-1)
+    elif params.source == "imdb":
+        ImdbProc(params.input_path, params.dest,  overwrite=True).process(nums=-1)
+    else:
+        raise Exception("fatal source")
