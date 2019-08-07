@@ -43,12 +43,12 @@ origin==paper, our == ourtesting
 | v2 | imdb| XXX |
 
 
-![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
         we can find the params of conv5 , "1 * 1 * 32", which has 1056 params. The SE(factor=2) has 1024 params, which means \
         conv5 contains SE and 1X1 conv. 
+        ![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 
 # puzzlement:
    
