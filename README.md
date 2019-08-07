@@ -26,16 +26,16 @@ This is a keras implements of c3ae for age estimation. welcome to discuss ~
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
-origin==paper, our == ourtesting
+origin==paper
 -------------------------
 
-|origin|wiki(MAE)|imdb(MAE)|
+|source|dataset|MAE|
 | -- | :--: | :--: |
-|  | wiki | 6.57 |
-|  | imdb| 6.44 |
+| from papper | wiki | 6.57 |
+| from papper | imdb| 6.44 |
 
--------------------------
-|our|wiki|imdb|
+---------our == expliting ----------------
+|source|dataset|MAE|
 | :--: | :--: | :--: |
 | v1 | wiki | XXX |
 | v2 | imdb| XXX |
