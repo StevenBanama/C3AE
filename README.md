@@ -1,11 +1,9 @@
-# C3AE
-#
-# [papers] ( https://arxiv.org/abs/1904.05059 )
+# [C3AE]( https://arxiv.org/abs/1904.05059 )
 
-This is a keras implements of c3ae. welcome to discuss ~ 
+This is a keras implements of c3ae for age estimation. welcome to discuss ~ 
 
 ## enviroments:
-   numpy, tensorflow(1.8), pandas, feather, opencv\
+   numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
 ```
     pip install -r requirements.txt
 ```
@@ -24,31 +22,32 @@ This is a keras implements of c3ae. welcome to discuss ~
 
 
 ## DETECT: 
-   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect and align \
-   ![trible box] (https://github.com/StevenBanama/C3AE/tree/master/assets/triple_boundbox.png)
+   [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
+   ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
-origin==paper, our == ourtesting
+origin==paper
 -------------------------
 
-|origin|wiki(MAE)|imdb(MAE)|
+|source|dataset|MAE|
 | -- | :--: | :--: |
-|  | wiki | 6.57 |
-|  | imdb| 6.44 |
+| from papper | wiki | 6.57 |
+| from papper | imdb| 6.44 |
 
--------------------------
-|our|wiki|imdb|
+our == Exploring (to do)
+
+|source|dataset|MAE|
 | :--: | :--: | :--: |
 | v1 | wiki | XXX |
 | v2 | imdb| 10.4(without pretrain) |
 
 
-![params](https://github.com/StevenBanama/C3AE/tree/master/assets/params.png)
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
         we can find the params of conv5 , "1 * 1 * 32", which has 1056 params. The SE(factor=2) has 1024 params, which means \
         conv5 contains SE and 1X1 conv. 
+        ![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 
 # puzzlement:
    
