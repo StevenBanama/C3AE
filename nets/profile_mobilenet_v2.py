@@ -19,21 +19,8 @@ from keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import train_test_split
 from keras.backend import argmax, pool2d
 from keras import backend as K
+from utils import reload_data
 
-COLUMS = ["age", "gender", "image", "width", "height", "source", "md5"]
-
-def reload_data(path_dir, file_ptn):
-    dataset = pd.DataFrame(columns=COLUMS)
-    for rdir, dlist, fnames in os.walk(path_dir):
-        fnames = filter(lambda x: x.endswith(".feather"), fnames)
-        fnames = list(filter(lambda x: re.search(file_ptn, x), fnames))
-        if fnames:
-            file_paths = map(lambda name: os.path.join(rdir, name), fnames)
-            frames = map(lambda path: feather.read_dataframe(path), file_paths)
-            dataset = pd.concat(list(frames), ignore_index=True)
-    dataframe = dataset
-    dataframe = dataframe[(dataframe["age"] > 0) & (dataframe["age"] < 101)]
-    return dataframe
 
 def l1_smooth(x):
     return K.cast(K.sum(x * x), dtype="float32")
@@ -88,30 +75,32 @@ def restore_model(model_name=".model/weights-improvement-{epoch:02d}-{val_acc:.2
         pmodel = Model(input=input_image, output=[gender, age, age_identy])
     return pmodel
 
-def image_process(x, seed=100, contrast=(0.5, 2.5), bright=(-50, 50)):
+def image_process(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50)):
+    (idx, row) = row[0], row[1]
+    img = np.fromstring(row["image"], np.uint8)
+    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+
     width, height = 96, 96
-    img = cv2.resize(np.frombuffer(x, dtype="uint8").reshape((160, 160, 3)), (height, width))
+    img = cv2.resize(img, (width, height))
     img = cv2.convertScaleAbs(img, alpha=random.uniform(*contrast), beta=random.uniform(*bright))
-    matRotate = cv2.getRotationMatrix2D((height, width), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
-    img = cv2.warpAffine(img, matRotate, (height, width))
+    matRotate = cv2.getRotationMatrix2D((width, height), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
+    img = cv2.warpAffine(img, matRotate, (width, height))
     if random.randint(0, 1):  # 翻转
        img = cv2.flip(img, 1)
     return img
 
 def preprocessing(dataframes, batch_size=32):
-    images, genders, ages = dataframes.image, dataframes.gender, dataframes.age
-    images = np.array(list(map(lambda x: image_process(x), images)))
-    return generate_data_generator(images, genders, ages) 
+    return generate_data_generator(dataframes) 
 
-def generate_data_generator(X, Y1, Y2, batch_size=32):
-    max_len = len(X)
+def generate_data_generator(dataframe, batch_size=32, is_training=True):
     from sklearn.preprocessing import OneHotEncoder
     from keras.utils import to_categorical
  
     while True:
-        idxes = [random.randint(0, max_len - 1) for _ in range(batch_size)]
-        out2 = [to_categorical(Y1.iloc[idxes], num_classes=2), to_categorical(Y2.iloc[idxes], num_classes=100), to_categorical(Y2.iloc[idxes], num_classes=100)]
-        yield X[idxes], out2
+        candis = dataframe.sample(batch_size, replace=False)
+        imgs = np.array(map(lambda x: image_process(x), candis.iterrows()))
+        out2 = [to_categorical(candis.gender, num_classes=2), to_categorical(candis.age, num_classes=100), to_categorical(candis.age, num_classes=100)]
+        yield imgs, out2
 
 def init_config():
     import tensorflow as tf
@@ -126,7 +115,7 @@ def init_config():
 def main():
     init_config()
     sample_rate, seed = 0.8, 2019
-    data_dir, file_ptn = "/data/bin.wen/repos/Prometheus/circus_zoos/profile/mobile_net/data/all_crops/", "imdb|wiki"
+    data_dir, file_ptn = "./dataset/data", "imdb|wiki"
     dataframes = reload_data(data_dir, file_ptn)
     trainset, testset = train_test_split(dataframes, train_size=sample_rate, test_size=1-sample_rate, random_state=seed)
     train_gen = preprocessing(trainset)

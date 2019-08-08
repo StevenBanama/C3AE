@@ -40,7 +40,7 @@ origin==paper, our == ourtesting
 |our|wiki|imdb|
 | :--: | :--: | :--: |
 | v1 | wiki | XXX |
-| v2 | imdb| XXX |
+| v2 | imdb| 10.4(without pretrain) |
 
 
 ![params](https://github.com/StevenBanama/C3AE/tree/master/assets/params.png)

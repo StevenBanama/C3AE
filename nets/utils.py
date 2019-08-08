@@ -62,7 +62,6 @@ def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotati
     img = cv2.imdecode(img, cv2.IMREAD_COLOR)
     #cv2.imwrite("%s_%s__.jpg"%(row.age, row.gender), img)
 
-    img = random_erasing(img, dropout)
     if is_training:
         img = random_erasing(img, dropout)
 
@@ -83,7 +82,8 @@ def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotati
 
 def image_enforcing(img, flag=0, contrast=(0.5, 2.5), bright=(-50, 50), rotation=(-15, 15)):
     if flag == 1:  # trans hue
-        img = cv2.convertScaleAbs(img, alpha=random.uniform(*contrast), beta=random.uniform(*bright))
+        #img = cv2.convertScaleAbs(img, alpha=random.uniform(*contrast), beta=random.uniform(*bright))
+        pass
     elif flag == 2:  # rotation
         height, width = img.shape[:-1]
         matRotate = cv2.getRotationMatrix2D((height, width), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
