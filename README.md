@@ -39,7 +39,7 @@ our == Exploring (to do)
 |source|dataset|MAE|
 | :--: | :--: | :--: |
 | v1 | wiki | XXX |
-| v2 | imdb| 10.4(without pretrain) |
+| v2 | imdb| 10.4(without pretrain， -_-||) |
 
 
 ## Questions: 
