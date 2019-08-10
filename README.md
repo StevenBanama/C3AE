@@ -1,19 +1,19 @@
 # [C3AE]( https://arxiv.org/abs/1904.05059 )
 
-This is a keras implements of c3ae for age estimation. welcome to discuss ~ 
+This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
-## enviroments:
+## required enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
-```
-    pip install -r requirements.txt
-```
+   
+   >>> pip install -r requirements.txt
 
-## download imdb/wiki dataset: \\
- [wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) \\
- [imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar) \\
- *download* then *extract* those data to the "./dataset/"
+##  Preparation
+*download*  imdb/wiki dataset and then *extract* those data to the "./dataset/" \
+ [download wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) 
+ [download imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
+ 
 
-## preprocess:
+## Preprocess:
     >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
@@ -26,7 +26,7 @@ This is a keras implements of c3ae for age estimation. welcome to discuss ~
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
-origin==paper
+### origin==paper
 -------------------------
 
 |source|dataset|MAE|
@@ -34,12 +34,11 @@ origin==paper
 | from papper | wiki | 6.57 |
 | from papper | imdb| 6.44 |
 
-our == Exploring (to do)
+### our == Exploring (to do)
 
 |source|dataset|MAE|
 | :--: | :--: | :--: |
-| v1 | wiki | XXX |
-| v2 | imdb| 10.4(without pretrain， -_-||) |
+| v2 | imdb-wiki| 10.4(without pretrain， -_-||) |
 
 
 ## Questions: 
