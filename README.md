@@ -43,7 +43,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
-   -  Conv5 1 * 1 * 32, has 1056 params, which mean 32*32 + 32. It contains a conv(1*1*32) with bias and global pooling.
+   -  Conv5 1 * 1 * 32, has 1056 params, which mean 32 * 32 + 32. It contains a conv(1 * 1 * 32) with bias and global pooling.
 ![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 
 # puzzlement:
