@@ -1,19 +1,19 @@
 # [C3AE]( https://arxiv.org/abs/1904.05059 )
 
-This is a keras implements of c3ae for age estimation. welcome to discuss ~ 
+This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
-## enviroments:
+## required enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
-```
-    pip install -r requirements.txt
-```
+   
+   >>> pip install -r requirements.txt
 
-## download imdb/wiki dataset: \\
- [wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) \\
- [imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar) \\
- *download* then *extract* those data to the "./dataset/"
+##  Preparation
+*download*  imdb/wiki dataset and then *extract* those data to the "./dataset/" \
+ [download wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) 
+ [download imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
+ 
 
-## preprocess:
+## Preprocess:
     >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
@@ -26,7 +26,7 @@ This is a keras implements of c3ae for age estimation. welcome to discuss ~
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
-origin==paper
+### origin==paper
 -------------------------
 
 |source|dataset|MAE|
@@ -34,20 +34,17 @@ origin==paper
 | from papper | wiki | 6.57 |
 | from papper | imdb| 6.44 |
 
-our == Exploring (to do)
+### our == Exploring (to do)
 
 |source|dataset|MAE|
 | :--: | :--: | :--: |
-| v1 | wiki | XXX |
-| v2 | imdb| 10.4(without pretrain) |
+| v2 | imdb-wiki| 10.2(without pretrain， -_-||) |
 
 
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
-   - SE model: we can treat "SE model" as scale factor, but we will be puzzle about the placement.\
-        we can find the params of conv5 , "1 * 1 * 32", which has 1056 params. The SE(factor=2) has 1024 params, which means \
-        conv5 contains SE and 1X1 conv. 
-        ![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
+   -  Conv5 1 * 1 * 32, has 1056 params, which mean 32*32 + 32. It contains a conv(1*1*32) with bias and global pooling.
+![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 
 # puzzlement:
    
