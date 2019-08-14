@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import logging
-from pyutils.funlib.tools import gen_md5
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
 from serilize import BaseProc
 from pose import get_rotation_angle
@@ -41,20 +40,19 @@ def gen_boundbox(box, landmark):
     top2nose = nose_y - ymin
     # 包含五官最小的框
     return np.array([
-        [(xmin - w_h_margin, ymin - w_h_margin), (xmax + w_h_margin, ymax + w_h_margin)],  # 外
-        [(nose_x - top2nose, nose_y - top2nose), (nose_x+top2nose, nose_y + top2nose)],  # 中间框
-        [(nose_x - w//2, nose_y - w//2), (nose_x + w//2, nose_y + w//2)]  # 内层框
+        [(xmin - w_h_margin, ymin - w_h_margin), (xmax + w_h_margin, ymax + w_h_margin)],  # inner
+        [(nose_x - top2nose, nose_y - top2nose), (nose_x+top2nose, nose_y + top2nose)],  # middle
+        [(nose_x - w//2, nose_y - w//2), (nose_x + w//2, nose_y + w//2)]  # outer box
     ])
 
-def gen_face(image, image_path=""):
-    ret = MTCNN_DETECT.detect_face(image) 
+def gen_face(detector, image, image_path=""):
+    ret = detector.detect_face(image) 
     if not ret:
         raise Exception("cant detect facei: %s"%image_path)
     bounds, lmarks = ret
     if len(bounds) > 1:
         raise Exception("more than one face %s"%image_path)
     return ret
-
 
 MTCNN_DETECT = MtcnnDetector(model_folder=None, ctx=mx.cpu(0), num_worker=1, minsize=50, accurate_landmark=True)
 
@@ -78,55 +76,61 @@ class WikiProc(ProfileProc):
         meta = loadmat(mat_path)
         full_path = meta[self.name][0, 0]["full_path"][0][:nums]
         dob = meta[self.name][0, 0]["dob"][0][:nums]  # Matlab serial date number
-        gender = meta[self.name][0, 0]["gender"][0][:nums]
+        mat_gender = meta[self.name][0, 0]["gender"][0][:nums]
         photo_taken = meta[self.name][0, 0]["photo_taken"][0][:nums]  # year
         face_score = meta[self.name][0, 0]["face_score"][0][:nums]
         second_face_score = meta[self.name][0, 0]["second_face_score"][0][:nums]
 
-        age = [calc_age(photo_taken[i], dob[i]) for i in range(len(dob))]
-        org_box, trible_box, raw_images, landmarks, rolls, yaws, pitches = self.crop_and_trans_images(self.data_dir, full_path, second_face_score, age, gender)
-        data = {"gender": gender, "age": age, "score": face_score,
-               "image": raw_images, "org_box": org_box, "trible_box": trible_box,
-               "landmarks": landmarks, "roll": rolls, "yaw": yaws, "pitch": pitches}
-        dataset1 = pd.DataFrame(data)
-        dataset1 = dataset1[(dataset1.score > 0.75) & (dataset1.age > 0) & (dataset1.age < 100)]
+        mat_age = [calc_age(photo_taken[i], dob[i]) for i in range(len(dob))]
+
+        mat_2_pd = pd.DataFrame({"full_path": full_path, "age": mat_age, "gender": mat_gender, "second_face_score": second_face_score, "face_score": face_score})
+        rows, cols = mat_2_pd.shape
+        frames = [self.sin_task(MTCNN_DETECT, mat_2_pd)]
+        self.dataframe = pd.concat(frames, ignore_index=True)
+
+    def sin_task(self, detector, predata):
+        dataset1 = predata.apply(lambda x: self.crop_and_trans_images(detector, x), axis=1)
+        dataset1 = dataset1[(dataset1.face_score > 0.75) & (dataset1.age > 0) & (dataset1.age < 100)]
         dataset1 = dataset1[COLUMS]
         dataset1 = dataset1[dataset1.landmarks != np.array([]).dumps()]
-        dataset1 = dataset1.dropna(axis=0)
-        self.dataframe = dataset1
+        return dataset1.dropna(axis=0)
 
-    def crop_and_trans_images(self, dirpath, full_path, second_face_score, age, gender):
+    def crop_and_trans_images(self, detector, series):
         # imdb 数据存在多张人脸，所以对于多人脸的数据直接清除掉
-        org_boxes, trible_boxes, raw_images, landmarks, rolls, yaws, pitches = [], [], [], [], [], [], []
-
-        for idx, file_name in enumerate(full_path):
-            image_path = os.path.join(dirpath, file_name[0])
+        image_path = os.path.join(self.data_dir, series.full_path[0])
+        try:
+            print(image_path)
             image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-            try:
-                bounds, lmarks = gen_face(image, image_path)
-                crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.6)  # aligned face with padding 0.4 in papper
-                if len(crops) == 0:
-                    raise Exception("no crops~~ %s"%image_path)
-                bounds, lmarks = gen_face(crops[0], image_path)  # recaculate landmar
-                org_box, first_lmarks = bounds[0], lmarks[0]
-                trible_box = gen_boundbox(org_box, first_lmarks)
-                pitch, yaw, roll = get_rotation_angle(image, first_lmarks) # gen face rotation for filtering
-                image = crops[0]   # select the first align face and replace
-            except Exception as ee:
-                logging.info("exception as ee: %s"%ee)
-                trible_box = np.array([])
-                org_box, first_lmarks = np.array([]), np.array([])
-                pitch, yaw, roll = 90, 90, 90
-            status, buf = cv2.imencode(".jpg", image)
-            raw_images.append(buf.tostring())
-            org_boxes.append(org_box.dumps())  # xmin, ymin, xmax, ymax
-            landmarks.append(first_lmarks.dumps())  # y1..y5, x1..x5
-            trible_boxes.append(trible_box.dumps())
-            pitches.append(pitch)
-            yaws.append(yaw)
-            rolls.append(roll)
+            if not np.isnan(series.second_face_score):
+                raise Exception("more than one face~---%s~-%s- %s"%(series.name, series.age, image_path))
+            bounds, lmarks = gen_face(detector, image, image_path)
+            crops = detector.extract_image_chips(image, lmarks, padding=0.4)  # aligned face with padding 0.4 in papper
+            if len(crops) == 0:
+                raise Exception("no crops~~ %s---%s"%(image_path, series.age))
+            if len(crops) > 1:
+                raise Exception("more than one face~---%s~-- %s"%(series.name, image_path))
+            bounds, lmarks = gen_face(detector, crops[0], image_path)  # recaculate landmar
+            org_box, first_lmarks = bounds[0], lmarks[0]
+            trible_box = gen_boundbox(org_box, first_lmarks)
+            pitch, yaw, roll = get_rotation_angle(crops[0], first_lmarks) # gen face rotation for filtering
+            image = crops[0]   # select the first align face and replace
+        except Exception as ee:
+            logging.info("exception as ee: %s"%ee)
+            trible_box = np.array([])
+            org_box, first_lmarks = np.array([]), np.array([])
+            pitch, yaw, roll = np.nan, np.nan, np.nan
+            age = np.nan
+            gender = np.nan
+        status, buf = cv2.imencode(".jpg", image)
+        series["image"] = buf.tostring() 
+        series["org_box"] = org_box.dumps()  # xmin, ymin, xmax, ymax
+        series["landmarks"] = first_lmarks.dumps()  # y1..y5, x1..x5
+        series["trible_box"] = trible_box.dumps() 
+        series["yaw"] = yaw
+        series["pitch"] = pitch
+        series["roll"] = roll
 
-        return org_boxes, trible_boxes, raw_images, landmarks, rolls, yaws, pitches
+        return series
 
     def rectify_data(self):
         logging.info(self.dataframe.groupby(["age"]).agg(["count"]))
@@ -152,11 +156,11 @@ class ImdbProc(WikiProc):
 
 def test_align():
      image = cv2.imread("timg4.jpg")
-     bounds, lmarks = gen_face(image)
-     crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.6)
+     bounds, lmarks = gen_face(MTCNN_DETECT, image)
+     crops = MTCNN_DETECT.extract_image_chips(image, lmarks, padding=0.4)
      if len(crops) == 0:
          raise Exception("no crops~~ %s"%image_path)
-     bounds, lmarks = gen_face(crops[0])
+     bounds, lmarks = gen_face(MTCNN_DETECT, crops[0])
      org_box, first_lmarks = bounds[0], lmarks[0]
      trible_box = gen_boundbox(org_box, first_lmarks)
      pitch, yaw, roll = get_rotation_angle(image, first_lmarks)
@@ -183,7 +187,7 @@ def init_parse():
         help='the path of dataset to load')
 
     parser.add_argument(
-        '-p', '--padding', default=0.6, type=float,
+        '-p', '--padding', default=0.4, type=float,
         help='face padding')
 
     return parser.parse_args()

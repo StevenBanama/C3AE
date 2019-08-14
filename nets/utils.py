@@ -22,10 +22,20 @@ def reload_data(path_dir, file_ptn):
             dataset = pd.concat(list(frames), ignore_index=True)
     dataframe = dataset
     dataframe = dataframe[(dataframe["age"] > 0) & (dataframe["age"] < 101)]
-    print(dataframe.count())
-    dataframe = dataframe = dataframe[(dataframe["yaw"] >-30) & (dataframe["yaw"] < 30) & (dataframe["roll"] >-10) & (dataframe["roll"] < 10) & (dataframe["pitch"] >-20) & (dataframe["pitch"] < 20) ]
-    print(dataframe.count())
-    return dataframe
+    dataframe = dataframe[(dataframe["yaw"] >-30) & (dataframe["yaw"] < 30) & (dataframe["roll"] >-20) & (dataframe["roll"] < 20) & (dataframe["pitch"] >-20) & (dataframe["pitch"] < 20) ]
+
+    return process_unbalance(dataframe)
+
+def process_unbalance(dataframe, max_nums=500, random_seed=2019):
+    sample = []
+    for x in xrange(100):
+        age_set = dataframe[dataframe.age == x]
+        cur_age_num = len(age_set)
+        if cur_age_num > max_nums:
+            age_set = age_set.sample(max_nums, random_state=random_seed, replace=False)
+        sample.append(age_set)
+    return pd.concat(sample, ignore_index=True)
+
 
 def two_point(age_label, category, interval=10, elips=0.000001):
     def age_split(age):
@@ -65,16 +75,17 @@ def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotati
     if is_training:
         img = random_erasing(img, dropout)
 
-    cascad_imgs, padding = [], 200
+    cascad_imgs, padding = [], 0
     new_bd_img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_CONSTANT)
+    height, width = img.shape[:2]
     for bbox in np.loads(row.trible_box):
-        ymin, xmin = bbox[0]
-        ymax, xmax = bbox[1]
-        #cv2.rectangle(img, (ymin, xmin), (ymax, xmax), (0,0,255), 2)
-        cascad_imgs.append(cv2.resize(new_bd_img[xmin+padding:xmax+padding, ymin+padding: ymax+padding], shape))
+        h_min, w_min = bbox[0]
+        h_max, w_max = bbox[1]
+        #cv2.rectangle(img, (h_min, w_min), (h_max, w_max), (0,0,255), 2)
+        cascad_imgs.append(cv2.resize(new_bd_img[max(w_min+padding, 0):min(w_max+padding, width), max(h_min+padding, 0): min(h_max+padding, height)], shape))
     ## if you want check data, and then you can remove these marks
     #if idx > 10000:
-    #    cv2.imwrite("%s_%s_%s.jpg"%(row.age, row.gender, idx), img)
+    #    cv2.imwrite("%s_%s_%s.jpg"%(row.age, row.gender, idx), cascad_imgs[2])
     if is_training:
        flag = random.randint(0, 3)
        cascad_imgs = map(lambda x: image_enforcing(x, flag, contrast, bright, rotation), cascad_imgs)
@@ -85,9 +96,10 @@ def image_enforcing(img, flag=0, contrast=(0.5, 2.5), bright=(-50, 50), rotation
         #img = cv2.convertScaleAbs(img, alpha=random.uniform(*contrast), beta=random.uniform(*bright))
         pass
     elif flag == 2:  # rotation
-        height, width = img.shape[:-1]
-        matRotate = cv2.getRotationMatrix2D((height, width), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
-        img = cv2.warpAffine(img, matRotate, (height, width))
+        #height, width = img.shape[:-1]
+        #matRotate = cv2.getRotationMatrix2D((height, width), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
+        #img = cv2.warpAffine(img, matRotate, (height, width))
+        pass
     elif flag == 3:  # flp 翻转
         img = cv2.flip(img, 1)
     return img
@@ -109,4 +121,4 @@ def generate_data_generator(dataframe, batch_size=32, category=12, interval=10, 
 
 if __name__ == "__main__":
     #cv2.imwrite("%s.jpg"%idx, ig)
-    print(two_point(57, 12, 10))
+    print(two_point(32, 12, 10))

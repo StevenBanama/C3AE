@@ -4,21 +4,23 @@ import os
 import re
 import feather
 import base64
+import math
 import numpy as np
 import pandas as pd
 import random
 import tensorflow as tf
 import keras.backend as K
+from keras.optimizers import Adam
 from keras.activations import softmax, sigmoid
 from keras.applications.mobilenet_v2 import MobileNetV2
 from keras.models import Model, load_model
 from keras.engine.input_layer import Input
-from keras.layers import BatchNormalization, Conv2D, ReLU, GlobalAveragePooling2D, multiply
+from keras.layers import BatchNormalization, Conv2D, ReLU, GlobalAveragePooling2D, multiply, GlobalMaxPooling2D
 from keras.layers.core import Dense, Dropout 
 from keras.layers import Lambda, Multiply, multiply
 from keras.preprocessing.image import ImageDataGenerator
 from keras.losses import categorical_crossentropy
-from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
+from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping, LearningRateScheduler, ReduceLROnPlateau, LambdaCallback
 from sklearn.model_selection import train_test_split
 from keras.backend import argmax, pool2d
 from keras import backend as K
@@ -62,35 +64,37 @@ def KeepMaxAdjactent(input, keep=2, axis=-1):
     print(window_mat)
     return tf.nn.softmax(window_mat)
 
-def build_complaim_network(height=64, width=64, channel=3):
+def build_shared_plain_network(height=64, width=64, channel=3):
     input_image = Input(shape=(height, width, channel))
 
-    conv1 = Conv2D(32, (3, 3), padding="valid", strides=1)(input_image)  # output 62*62*32
+    conv1 = Conv2D(32, (3, 3), padding="valid", strides=1, use_bias=False)(input_image)  # output 62*62*32
     block1 = Lambda(BRA, name="BRA")(conv1)
 
-    conv2 = Conv2D(32, (3, 3), padding="valid", strides=1)(block1)
+    conv2 = Conv2D(32, (3, 3), padding="valid", strides=1)(block1)  # param 9248 = 32 * 32 * 3 * 3 + 32
     block2 = Lambda(BRA, name="BRA2")(block1)
 
-    conv3 = Conv2D(32, (3, 3), padding="valid", strides=1)(block2)
+    conv3 = Conv2D(32, (3, 3), padding="valid", strides=1)(block2)  # 9248
     block3 = Lambda(BRA, name="BRA3")(conv3)
     #block3 = SE_BLOCK(bra3)
 
-    conv4 = Conv2D(32, (3, 3), padding="valid", strides=1)(block3)
-    block4 = Lambda(BN_ReLU, name="BN_ReLu")(conv4)
+    conv4 = Conv2D(32, (3, 3), padding="valid", strides=1)(block3)  # 9248
+    block4 = Lambda(BN_ReLU, name="BN_ReLu")(conv4)  # 128 
 
-    #conv5 = Conv2D(32, (1, 1), padding="valid", strides=1)(block4)  # 4 * 4 *32
-    conv5 = SE_BLOCK(block4)  # r=16效果不如conv5
+    conv5 = Conv2D(32, (1, 1), padding="valid", strides=1)(block4)  # 1024 + 32
+    #conv5 = SE_BLOCK(conv5)  # r=16效果不如conv5
+
+    feature = GlobalAveragePooling2D()(Conv2D(12, (1, 1), padding="valid", strides=1)(conv5))  # 12
 
     # cant find the detail how to change 4*4*32->12, you can try out all dims reduction
     # fc or pooling or any ohter operation
-    shape = map(int, conv5.get_shape()[1:])
-    shrinking_op = Lambda(lambda x: K.reshape(x, (-1, np.prod(shape))))(conv5)
+    #shape = map(int, conv5.get_shape()[1:])
+    #shrinking_op = Lambda(lambda x: K.reshape(x, (-1, np.prod(shape))))(conv5)
 
-    pmodel = Model(input=input_image, output=[shrinking_op])
+    pmodel = Model(input=input_image, output=[feature])
     return pmodel
 
 def build_net(CATES=12, height=64, width=64, channel=3):
-    base_model = build_complaim_network()
+    base_model = build_shared_plain_network()
     x1 = Input(shape=(height, width, channel))
     x2 = Input(shape=(height, width, channel))
     x3 = Input(shape=(height, width, channel))
@@ -100,10 +104,9 @@ def build_net(CATES=12, height=64, width=64, channel=3):
     y3 = base_model(x3)
 
     cfeat = Lambda(Concat)([y1, y2, y3])
-    #cfeat = Lambda(BN_ReLU, name="BN_ReLu2")(cfeat)
+    
     bulk_feat = Dense(CATES, activation=softmax, kernel_regularizer=regularizers.l1(0), name="W1")(cfeat)
-    #bulk_feat = Lambda(KeepTopN, name="bulk")(bulk_feat)
-    age = Dense(1, name="age", kernel_regularizer=regularizers.l1(0))(bulk_feat)
+    age = Dense(1, name="age")(bulk_feat)
     #age = Lambda(lambda a: tf.reshape(tf.reduce_sum(a * tf.constant([[x * 10.0 for x in xrange(12)]]), axis=-1), shape=(-1, 1)), name="age")(bulk_feat)
     return Model(input=[x1, x2, x3], output=[age, bulk_feat])
 
@@ -125,27 +128,39 @@ def config_gpu():
 
 def train(params):
     from utils import reload_data
-    sample_rate, seed, batch_size, category, interval = 0.8, 2019, 50, 12, 10
+    sample_rate, seed, batch_size, category, interval = 0.8, 2019, params.batch_size, params.category + 2, int(math.ceil(100. / params.category))
+    lr = 0.002
     data_dir, file_ptn = params.dataset, params.source
     dataframes = reload_data(data_dir, file_ptn)
     trainset, testset = train_test_split(dataframes, train_size=sample_rate, test_size=1-sample_rate, random_state=seed)
-    train_gen = preprocessing(trainset, dropout=params.dropout)
-    validation_gen = preprocessing(testset, is_training=False)
+    train_gen = preprocessing(trainset, dropout=params.dropout, category=category, interval=interval)
+    validation_gen = preprocessing(testset, is_training=False, category=category, interval=interval)
+    print(trainset.groupby(["age"]).agg(["count"]))
+    print(testset.groupby(["age"]).agg(["count"]))
 
     if params.pretrain_path and os.path.exists(params.pretrain_path): 
         models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf})
     else:
-        models = build_net()
+        models = build_net(category)
+    adam = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0001, amsgrad=False)
     models.compile(
-        optimizer="Adam",
+        optimizer=adam,
         loss=["mean_absolute_error", "kullback_leibler_divergence"],
         metrics={"age": "mae", "W1": "mae"},
-        loss_weights=[1, 10]
+        loss_weights=[1, params.weight_factor]
     )
+    W2 = models.get_layer("age")
+
+    def get_weights(epoch, loggs):
+        print(epoch, K.get_value(models.optimizer.lr), W2.get_weights())
     callbacks = [
         ModelCheckpoint(params.save_path, monitor='val_age_mean_absolute_error', verbose=1, save_best_only=True, mode='min'),
+        ModelCheckpoint("train_" + params.save_path, monitor='age_mean_absolute_error', verbose=1, save_best_only=True, mode='min'),
         TensorBoard(log_dir=params.log_dir, batch_size=batch_size, write_images=True, update_freq='epoch'),
-        EarlyStopping(monitor='val_age_mean_absolute_error', patience=20, verbose=0, mode='min')
+        #EarlyStopping(monitor='val_age_mean_absolute_error', patience=10, verbose=0, mode='min'),
+        #LearningRateScheduler(lambda epoch: lr - 0.0001 * epoch // 10),
+        ReduceLROnPlateau(monitor='age_mean_absolute_error', factor=0.2, patience=10, min_lr=0.00001),
+        LambdaCallback(on_epoch_end=get_weights)
     ]
     history = models.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=600, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
 
@@ -176,6 +191,19 @@ def init_parse():
     parser.add_argument(
         '-p', '--pretrain_path', dest="pretrain_path", default="", type=str,
         help='the pretrain path')
+
+    parser.add_argument(
+        '-b', '--batch_size', default=50, type=int,
+        help='batch size degfault=50')
+
+    parser.add_argument(
+        '-w', '--weight_factor', default=10, type=int,
+        help='age feature weight=10')
+
+
+    parser.add_argument(
+        '-c', '--category', default=10, type=int,
+        help='category nums degfault=10, n+2')
 
     parser.add_argument(
         '-gpu', dest="gpu", action='store_true',
