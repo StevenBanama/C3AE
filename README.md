@@ -38,7 +38,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 
 |source|dataset|MAE|
 | :--: | :--: | :--: |
-| v2 | imdb-wiki| 10.2(without pretrain， -_-||) |
+| v2 | imdb-wiki| 9.5(without pretrain， -_-||) |
 
 
 ## Questions: 
