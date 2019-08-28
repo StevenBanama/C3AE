@@ -7,9 +7,9 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - dataset (you`d better put dataset into this dir.)
    - detect (MTCNN and align)
    - download.sh (bash script of downloading dataset)
-     - C3AE.py 
    - model (pretrain model will be here)
    - nets (all tainging code)
+       - C3AE.py 
    - preproccessing (preprocess dataset)
    - tools (todo)
 
