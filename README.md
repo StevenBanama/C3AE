@@ -14,9 +14,11 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - tools (todo)
 
 ## net struct
-![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
-![plain model](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png)
-![compack models](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/compack_model.png)
+<figure class="third">
+    <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png">
+    <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png">
+    <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/compack_model.png">
+</figure>
 
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
