@@ -32,7 +32,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
 ## training: 
-    >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source wiki -w 10
+    >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10
 
 
 ## DETECT: 
