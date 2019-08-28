@@ -13,9 +13,6 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - preproccessing (preprocess dataset)
    - tools (todo)
 
-## net struct
-![ params ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png) ![ plain_model ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png) 
-
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
 
@@ -57,7 +54,10 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - feat: change [4 * 4 * 32] to [12] with 6156 params.As far as known, it may be compose of  conv(6144+12) ,pooling and softmax.
 
 # puzzlement:
-   
+  
+## net struct
+![ params ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png) ![ plain_model ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png) 
+
 ## Reference
   - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
   - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
