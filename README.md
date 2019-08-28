@@ -2,6 +2,17 @@
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
+## structs
+   - assets 
+   - dataset (you`d better put dataset into this dir.)
+   - detect (MTCNN and align)
+   - download.sh (bash script of downloading dataset)
+   - model (pretrain model will be here)
+   - nets (all tainging code)
+       - C3AE.py 
+   - preproccessing (preprocess dataset)
+   - tools (todo)
+
 ## Pretain mode(to do)
    >> to do
 
@@ -21,7 +32,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
 ## training: 
-    >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source wiki 
+    >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10
 
 
 ## DETECT: 
@@ -36,12 +47,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | -- | :--: | :--: |
 | from papper | wiki | 6.57 |
 | from papper | imdb| 6.44 |
-
-### our == Exploring (to do)
-
-|source|dataset|MAE|
-| :--: | :--: | :--: |
-| v84 | imdb-wiki| 7.4(without pretrain， -_-||) |
+| c3ae-v84 | imdb| 6.9(without pretrain， -_-||) |
 
 
 ## Questions: 
@@ -52,3 +58,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 
 # puzzlement:
    
+## Reference
+  - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
+  - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
+  
