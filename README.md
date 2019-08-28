@@ -59,6 +59,6 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 # puzzlement:
    
 ## Reference
-  focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
-  mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
+  - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
+  - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
   
