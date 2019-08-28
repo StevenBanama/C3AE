@@ -13,8 +13,13 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - preproccessing (preprocess dataset)
    - tools (todo)
 
-## Pretain mode(to do)
-   >> to do
+## net struct
+![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
+![plain model](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png)
+![compack models](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/compack_model.png)
+
+## Pretain mode(a temp model)
+   >> all trainned  model saved in dir named "model"
 
 ## required enviroments:
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
@@ -40,21 +45,18 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
 
-### origin==paper
--------------------------
+--------[result]-----------------
 
-|source|dataset|MAE|
-| -- | :--: | :--: |
-| from papper | wiki | 6.57 |
-| from papper | imdb| 6.44 |
-| c3ae-v84 | imdb| 6.9(without pretrain， -_-||) |
+|source|version|IMDB(mae)|WIKI(mae)|
+| -- | -- | :--: | :--: |
+| from papper | -- | **6.57** | **6.44** |
+| our implment | c3ae-v84 | **6.8**(without pretrain， -_-||) | to-do |
 
 
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - Conv5 1 * 1 * 32, has 1056 params, which mean 32 * 32 + 32. It contains a conv(1 * 1 * 32) with bias 
    - feat: change [4 * 4 * 32] to [12] with 6156 params.As far as known, it may be compose of  conv(6144+12) ,pooling and softmax.
-![params](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png)
 
 # puzzlement:
    
