@@ -74,6 +74,7 @@ class WikiProc(ProfileProc):
         mat_path = os.path.join(self.data_dir, self.mat_file)
         logging.info(mat_path)
         meta = loadmat(mat_path)
+        print(meta)
         full_path = meta[self.name][0, 0]["full_path"][0][:nums]
         dob = meta[self.name][0, 0]["dob"][0][:nums]  # Matlab serial date number
         mat_gender = meta[self.name][0, 0]["gender"][0][:nums]
@@ -90,10 +91,11 @@ class WikiProc(ProfileProc):
 
     def sin_task(self, detector, predata):
         dataset1 = predata.apply(lambda x: self.crop_and_trans_images(detector, x), axis=1)
-        dataset1 = dataset1[(dataset1.face_score > 0.75) & (dataset1.age > 0) & (dataset1.age < 100)]
+        dataset1 = dataset1[(dataset1.age >= 0) & (dataset1.age <= 100)]
+        dataset1 = dataset1[dataset1.gender != np.nan]
         dataset1 = dataset1[COLUMS]
         dataset1 = dataset1[dataset1.landmarks != np.array([]).dumps()]
-        return dataset1.dropna(axis=0)
+        return dataset1
 
     def crop_and_trans_images(self, detector, series):
         # imdb 数据存在多张人脸，所以对于多人脸的数据直接清除掉

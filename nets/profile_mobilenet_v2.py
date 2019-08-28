@@ -90,17 +90,8 @@ def image_process(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50)):
     return img
 
 def preprocessing(dataframes, batch_size=32):
-    return generate_data_generator(dataframes) 
-
-def generate_data_generator(dataframe, batch_size=32, is_training=True):
-    from sklearn.preprocessing import OneHotEncoder
-    from keras.utils import to_categorical
- 
-    while True:
-        candis = dataframe.sample(batch_size, replace=False)
-        imgs = np.array(map(lambda x: image_process(x), candis.iterrows()))
-        out2 = [to_categorical(candis.gender, num_classes=2), to_categorical(candis.age, num_classes=100), to_categorical(candis.age, num_classes=100)]
-        yield imgs, out2
+    from utils import generate_category_generator
+    return generate_category_generator(dataframes) 
 
 def init_config():
     import tensorflow as tf
@@ -128,7 +119,7 @@ def main():
         loss_weights=[50, 0.5, 0]
     )
     batch_size = 32
-    callbacks = [ModelCheckpoint(model_name, monitor='val_gender_acc', verbose=1, save_best_only=False, mode='max')]
+    callbacks = [ModelCheckpoint(model_name, monitor='val_age_metrix_age_diff', verbose=1, save_best_only=False, mode='max')]
     history = pmodel.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=200, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
 
 
