@@ -1,7 +1,12 @@
 # [C3AE]( https://arxiv.org/abs/1904.05059 )
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
+--------[result]-----------------
 
+|source|version|IMDB(mae)|WIKI(mae)|
+| -- | -- | :--: | :--: |
+| from papper | -- | **6.57** | **6.44** |
+| our implment | c3ae-v84 | **6.77**(without pretrain) | **6.74** |
 <div>
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
 </div>
@@ -50,15 +55,6 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
-
-
---------[result]-----------------
-
-|source|version|IMDB(mae)|WIKI(mae)|
-| -- | -- | :--: | :--: |
-| from papper | -- | **6.57** | **6.44** |
-| our implment | c3ae-v84 | **6.77**(without pretrain， -_-||) | **6.74** |
-
 
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
