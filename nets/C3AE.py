@@ -174,7 +174,7 @@ def train(params):
         ReduceLROnPlateau(monitor='val_age_mean_absolute_error', factor=0.1, patience=10, min_lr=0.00001),
         LambdaCallback(on_epoch_end=get_weights)
     ]
-    history = models.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=600, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
+    history = models.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=160, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
 
 
 def init_parse():
