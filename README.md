@@ -33,9 +33,9 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    >>> pip install -r requirements.txt
 
 ## test
-   for image
+ - for image
    >>> python nets/test.py -i assets/timg.jpg
-   for video
+ - for video
    >>> python nets/test.py -v
 
 
