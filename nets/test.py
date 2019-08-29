@@ -1,3 +1,5 @@
+import sys
+sys.path.append("./")
 from C3AE import *
 import mxnet as mx
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
@@ -18,7 +20,7 @@ def predict(models, img, save_image=False):
         print(img.shape, ee)
     if not ret:
         print("no face")
-        return
+        return img
     print(bounds, lmarks)
     padding = 200
     new_bd_img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_CONSTANT)
@@ -65,7 +67,8 @@ def video(params):
         if not ret:
             continue
         img = predict(models, img) 
-        cv2.imshow("result", img)
+        if img is not None:
+            cv2.imshow("result", img)
         if cv2.waitKey(3) == 27:
             break
 

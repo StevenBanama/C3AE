@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import math
-from circus_zoos.detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
+from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
 
 def quaterniondToRulerAngle(quaterniond):
     q = quaterniond
