@@ -57,7 +57,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 |source|version|IMDB(mae)|WIKI(mae)|
 | -- | -- | :--: | :--: |
 | from papper | -- | **6.57** | **6.44** |
-| our implment | c3ae-v84 | **6.77**(without pretrain， -_-||) | 6.74 |
+| our implment | c3ae-v84 | **6.77**(without pretrain， -_-||) | **6.74** |
 
 
 ## Questions: 
