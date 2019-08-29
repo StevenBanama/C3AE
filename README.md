@@ -2,8 +2,10 @@
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
-![example1](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg)
-![example2](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg)
+<figure class="three">
+<img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="100" height="100">
+<img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="100" height="100">
+</figure>
 
 
 ## structs
