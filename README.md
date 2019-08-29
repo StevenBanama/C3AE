@@ -1,8 +1,9 @@
 # [C3AE]( https://arxiv.org/abs/1904.05059 )
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
+
 ![example1](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg)
-![example2](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg)
+![example2](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg)
 
 
 ## structs
@@ -23,6 +24,13 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
    
    >>> pip install -r requirements.txt
+
+## test
+   for image
+   >>> python nets/test.py -i assets/timg.jpg
+   for video
+   >>> python nets/test.py -v
+
 
 ##  Preparation
 *download*  imdb/wiki dataset and then *extract* those data to the "./dataset/" \
