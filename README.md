@@ -11,7 +11,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | -- | -- | :--: | :--: |
 | from papper | -- | **6.57** | **6.44** |
 | our implement | c3ae-v84 | **6.77**(without SE_NET) | **6.74** |
-| our implement v2 | c3ae-v89 | **6.63**(with SE_NET) | -- |
+| our implement v2 | c3ae-v89 | **6.61**(with SE_NET) | -- |
 
 
 ## structs
@@ -23,7 +23,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - nets (all tainging code)
        - C3AE.py 
    - preproccessing (preprocess dataset)
-   - tools (todo)
+   - tools (has been moved to ./net/test.py)
 
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
