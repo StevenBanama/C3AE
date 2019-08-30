@@ -10,8 +10,10 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 |source|version|IMDB(mae)|WIKI(mae)|
 | -- | -- | :--: | :--: |
 | from papper | -- | **6.57** | **6.44** |
-| our implement | c3ae-v84 | **6.77**(without SE_NET) | **6.74** |
-| our implement v2 | c3ae-v89 | **6.61**(with SE_NET) | -- |
+| our implement | c3ae-v84 | **6.77**(focal_loss) | **6.74** |
+| our implement v2 | c3ae-v89 | **6.58**(with SE_NET + focal loss) | -- |
+| our implement v3 | c3ae-v90 | **6.53**(with SE_NET + white norm) | -- |
+
 
 
 ## structs
