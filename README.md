@@ -1,8 +1,18 @@
 # [C3AE]( https://arxiv.org/abs/1904.05059 )
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
-![example1](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg)
-![example2](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg)
+
+--------[result]-----------------
+<div>
+<img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
+</div>
+
+|source|version|IMDB(mae)|WIKI(mae)|extra change|
+| -- | -- | :--: | :--: | :--:|
+| from papper | -- | **6.57** | **6.44** | -- |
+| our implement | c3ae-v84 | **6.77**(focal_loss) | **6.74** | change kl to focal loss without se_net|
+| our implement v2 | c3ae-v89 | **6.58**(with SE_NET + focal loss) | -- | SE_NET + focal_loss |
+| our implement v3 | c3ae-v90 | **6.53**(with SE_NET + white norm) | -- | white norm + SE_NET + focal_loss |
 
 
 ## structs
@@ -14,7 +24,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - nets (all tainging code)
        - C3AE.py 
    - preproccessing (preprocess dataset)
-   - tools (todo)
+   - tools (has been moved to ./net/test.py)
 
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
@@ -23,6 +33,13 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
    
    >>> pip install -r requirements.txt
+
+## test
+ - for image
+   >>> python nets/test.py -i assets/timg.jpg
+ - for video
+   >>> python nets/test.py -v
+
 
 ##  Preparation
 *download*  imdb/wiki dataset and then *extract* those data to the "./dataset/" \
@@ -46,25 +63,19 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
    ![trible box](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/triple_boundbox.png)
 
-
---------[result]-----------------
-
-|source|version|IMDB(mae)|WIKI(mae)|
-| -- | -- | :--: | :--: |
-| from papper | -- | **6.57** | **6.44** |
-| our implment | c3ae-v84 | **6.77**(without pretrain， -_-||) | 6.74 |
+## net struct
+![ params ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png) ![ plain_model ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png) 
 
 
 ## Questions: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - Conv5 1 * 1 * 32, has 1056 params, which mean 32 * 32 + 32. It contains a conv(1 * 1 * 32) with bias 
    - feat: change [4 * 4 * 32] to [12] with 6156 params.As far as known, it may be compose of  conv(6144+12) ,pooling and softmax.
+   - the distribution of imdb and wiki are unbalanced, that`s why change the KL loss to focal loss
 
-# puzzlement:
+## puzzlement:
+  - the result of the feature layer(W2) is far from expected. Maybe our code exists some error.
   
-## net struct
-![ params ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png) ![ plain_model ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png) 
-
 ## Reference
   - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
   - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
