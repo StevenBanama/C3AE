@@ -17,7 +17,7 @@ from keras.models import Model, load_model
 from keras.engine.input_layer import Input
 from keras.layers import BatchNormalization, Conv2D, ReLU, GlobalAveragePooling2D, multiply, GlobalMaxPooling2D, AveragePooling2D, Concatenate
 from keras.layers.core import Dense, Dropout
-from keras.layers import Lambda, Multiply, multiply, Reshape
+from keras.layers import Lambda, Multiply, multiply, Reshape, Add
 from keras.preprocessing.image import ImageDataGenerator
 from keras.losses import categorical_crossentropy
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping, LearningRateScheduler, ReduceLROnPlateau, LambdaCallback
@@ -39,7 +39,9 @@ def BN_ReLU(input, name):
 def Concat(ins):
     return K.concatenate(ins, axis=-1)
 
-def SE_BLOCK(input, r_factor=2):
+def SE_BLOCK(input, using_SE=True, r_factor=2):
+    if not using_SE:
+        return input
     channel_nums = input.get_shape()[-1].value
     ga_pooling = GlobalAveragePooling2D()(input)
     fc1 = Dense(channel_nums//r_factor)(ga_pooling)
@@ -67,24 +69,34 @@ def KeepMaxAdjactent(input, keep=2, axis=-1):
     print(window_mat)
     return tf.nn.softmax(window_mat)
 
-def build_shared_plain_network(height=64, width=64, channel=3):
+def white_norm(input):
+    return (input - tf.constant(127.5)) /128.0
+
+def build_shared_plain_network(height=64, width=64, channel=3, using_white_norm=True, using_SE=True):
     input_image = Input(shape=(height, width, channel))
 
-    conv1 = Conv2D(32, (3, 3), padding="valid", strides=1, use_bias=False, name="conv1")(input_image)  # output 62*62*32
+    if using_white_norm:
+        wn = Lambda(white_norm, name="white_norm")(input_image)
+        conv1 = Conv2D(32, (3, 3), padding="valid", strides=1, use_bias=False, name="conv1")(wn)  # output 62*62*32
+    else:
+        conv1 = Conv2D(32, (3, 3), padding="valid", strides=1, use_bias=False, name="conv1")(input_image)  # output 62*62*32
     block1 = BRA(conv1)
+    block1 = SE_BLOCK(block1, using_SE)
 
     conv2 = Conv2D(32, (3, 3), padding="valid", strides=1, name="conv2")(block1)  # param 9248 = 32 * 32 * 3 * 3 + 32
     block2 = BRA(conv2)
+    block2 = SE_BLOCK(block2, using_SE)  # put the se_net after BRA which achived better!!!!
 
     conv3 = Conv2D(32, (3, 3), padding="valid", strides=1, name="conv3")(block2)  # 9248
     block3 = BRA(conv3)
-    #block3 = SE_BLOCK(bra3)
+    block3 = SE_BLOCK(block3, using_SE)
 
     conv4 = Conv2D(32, (3, 3), padding="valid", strides=1, name="conv4")(block3)  # 9248
     block4 = BN_ReLU(conv4, name="BN_ReLu")  # 128
+    block4 = SE_BLOCK(block4, using_SE)
 
     conv5 = Conv2D(32, (1, 1), padding="valid", strides=1, name="conv5")(block4)  # 1024 + 32
-    #conv5 = SE_BLOCK(conv5)  # r=16效果不如conv5
+    conv5 = SE_BLOCK(conv5, using_SE)  # r=16效果不如conv5
 
     flat_conv = Reshape((-1,))(conv5)
     # cant find the detail how to change 4*4*32->12, you can try out all dims reduction
@@ -95,8 +107,8 @@ def build_shared_plain_network(height=64, width=64, channel=3):
     pmodel = Model(input=input_image, output=[flat_conv])
     return pmodel
 
-def build_net(CATES=12, height=64, width=64, channel=3):
-    base_model = build_shared_plain_network()
+def build_net(CATES=12, height=64, width=64, channel=3, using_white_norm=True, using_SE=True):
+    base_model = build_shared_plain_network(using_white_norm=using_white_norm, using_SE=using_SE)
     print(base_model.summary())
     x1 = Input(shape=(height, width, channel))
     x2 = Input(shape=(height, width, channel))
@@ -147,7 +159,7 @@ def train(params):
     if params.pretrain_path and os.path.exists(params.pretrain_path):
         models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss(age_dist)})
     else:
-        models = build_net(category)
+        models = build_net(category, using_SE=params.se_net, using_white_norm=params.white_norm)
     adam = Adam(lr=lr)
     #cate_weight = K.variable(params.weight_factor)
 
@@ -220,6 +232,14 @@ def init_parse():
     parser.add_argument(
         '-gpu', dest="gpu", action='store_true',
         help='config of GPU')
+
+    parser.add_argument(
+        '-se', "--se-net", dest="se_net", action='store_true',
+        help='use SE-NET')
+
+    parser.add_argument(
+        '-white', '--white-norm', dest="white_norm", action='store_true',
+        help='use white norm')
 
     parser.add_argument(
         '-d', '--dropout', default="0.2", type=float,

@@ -6,13 +6,15 @@ from preproccessing.dataset_proc import gen_face, gen_boundbox
 MTCNN_DETECT = MtcnnDetector(model_folder=None, ctx=mx.cpu(0), num_worker=1, minsize=50, accurate_landmark=True)
 
 def load_C3AE(pretrain_path="model/imdb_focal_loss_c3ae_v84.h5"):
-    models = load_model(pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss([1] * 12)})
+    models = load_model(pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU,
+        "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss([1] * 12),
+        "white_norm": white_norm})
     return models
 
 def predict(models, img, save_image=False):
     try:
         bounds, lmarks = gen_face(MTCNN_DETECT, img)
-        ret = MTCNN_DETECT.extract_image_chips(img, lmarks, padding=0.4) 
+        ret = MTCNN_DETECT.extract_image_chips(img, lmarks, padding=0.4)
     except Exception as ee:
         ret = None
         print(img.shape, ee)
@@ -44,13 +46,14 @@ def predict(models, img, save_image=False):
         age = models.predict(tri_imgs)
         cv2.putText(new_bd_img, 'age%s'%age[pidx][0], (int(bounds[pidx][0]), int(bounds[pidx][2])), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (25, 2, 175), 2)
     if save_image:
+        print(age)
         cv2.imwrite("igg.jpg", new_bd_img)
     return new_bd_img
 
 def test_img(params):
     img = cv2.imread(params.image)
     models = load_C3AE(params.model_path)
-    predict(models, img) 
+    predict(models, img, True)
 
 def video(params):
     cap = cv2.VideoCapture(0)
@@ -64,7 +67,7 @@ def video(params):
 
         if not ret:
             continue
-        img = predict(models, img) 
+        img = predict(models, img)
         cv2.imshow("result", img)
         if cv2.waitKey(3) == 27:
             break
@@ -89,7 +92,7 @@ def init_parse():
 
 
 if __name__ == "__main__":
-    params = init_parse() 
+    params = init_parse()
     if params.video:
         video(params)
     else:

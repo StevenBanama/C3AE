@@ -59,11 +59,11 @@ def random_erasing(img, drop_out=0.3, aspect=(0.5, 2), area=(0.06, 0.10)):
         return img
     img = img.copy()
     height, width = img.shape[:-1]
-    aspect_ratio = np.random.uniform(*aspect) 
-    area_ratio = np.random.uniform(*area) 
+    aspect_ratio = np.random.uniform(*aspect)
+    area_ratio = np.random.uniform(*area)
     img_area = height * width * area_ratio
-    dwidth, dheight = np.sqrt(img_area * aspect_ratio), np.sqrt(img_area * 1 / aspect_ratio)  
-    xmin = random.randint(0, height) 
+    dwidth, dheight = np.sqrt(img_area * aspect_ratio), np.sqrt(img_area * 1 / aspect_ratio) 
+    xmin = random.randint(0, height)
     ymin = random.randint(0, width)
     xmax, ymax = min(height, int(xmin + dheight)), min(width, int(ymin + dwidth))
     img[xmin:xmax,ymin:ymax,:] = np.random.random_integers(0, 256, (xmax-xmin, ymax-ymin, 3))
@@ -78,7 +78,7 @@ def get_normal_image(row, seed=100, shape=(96, 96), is_training=True):
     img = img[bbox[0]:bbox[2], bbox[1]:bbox[3],:]
     img = cv2.resize(img, shape)
     return img
-     
+    
 
 class ThresCallback(Callback):
     def __init__(self, candi, watch_dog, thres, val):
@@ -132,7 +132,7 @@ def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
         return fianal_loss
     return focal_loss_fixed
 
-def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotation=(-15, 15), dropout=0., shape=(64, 64), is_training=True): 
+def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotation=(-15, 15), dropout=0., shape=(64, 64), is_training=True):
     (idx, row) = row[0], row[1]
     img = np.fromstring(row["image"], np.uint8)
     img = cv2.imdecode(img, cv2.IMREAD_COLOR)
@@ -180,7 +180,7 @@ def padding_image(img, padding=0.1):
 
 def generate_data_generator(dataframe, batch_size=32, category=12, interval=10, is_training=True, dropout=0.):
     dataframe = dataframe.reset_index(drop=True)
-    all_nums = len(dataframe) 
+    all_nums = len(dataframe)
     while True:
         idxs = np.random.permutation(all_nums)
         start = 0
@@ -194,7 +194,7 @@ def generate_data_generator(dataframe, batch_size=32, category=12, interval=10, 
 def generate_category_generator(dataframe, batch_size=32, category=12, interval=10, is_training=True, dropout=0.):
     from keras.utils import to_categorical
     dataframe = dataframe.reset_index(drop=True)
-    all_nums = len(dataframe) 
+    all_nums = len(dataframe)
     while True:
         idxs = np.random.permutation(all_nums)
         start = 0

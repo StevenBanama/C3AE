@@ -35,7 +35,11 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
 
 ## training: 
+    plain net
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10
+    with se-net and white-norm (better result)
+    >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10 -white -se
+
 
 
 ## DETECT: 
