@@ -12,7 +12,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | from papper | -- | **6.57** | **6.44** | -- | -- |
 | our implement | c3ae-v84 | **6.77** | **6.74** | change kl to focal loss without se_net|  model/imdb_focal_loss_c3ae_v84.h5 | model/c3ae_wiki_v87.h5 |
 | our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
-| our implement v3 | c3ae-v90 | **6.53**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
+| our implement v3 | c3ae-v90 | **6.51**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
 
 ## structs
@@ -24,7 +24,6 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - nets (all tainging code)
        - C3AE.py 
    - preproccessing (preprocess dataset)
-   - tools (has been moved to ./net/test.py)
 
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
@@ -48,8 +47,8 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
  
 
 ## Preprocess:
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
+    >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
+    >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
 
 ## training: 
     plain net
