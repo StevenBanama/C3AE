@@ -70,7 +70,7 @@ def KeepMaxAdjactent(input, keep=2, axis=-1):
     return tf.nn.softmax(window_mat)
 
 def white_norm(input):
-    return (input - tf.constant(127.5)) /128.0
+    return (input - tf.constant(127.5)) / 128.0
 
 def build_shared_plain_network(height=64, width=64, channel=3, using_white_norm=True, using_SE=True):
     input_image = Input(shape=(height, width, channel))

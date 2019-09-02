@@ -7,12 +7,12 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
 </div>
 
-|source|version|IMDB(mae)|WIKI(mae)|extra change|
-| -- | -- | :--: | :--: | :--:|
-| from papper | -- | **6.57** | **6.44** | -- |
-| our implement | c3ae-v84 | **6.77**(focal_loss) | **6.74** | change kl to focal loss without se_net|
-| our implement v2 | c3ae-v89 | **6.58**(with SE_NET + focal loss) | -- | SE_NET + focal_loss |
-| our implement v3 | c3ae-v90 | **6.53**(with SE_NET + white norm) | -- | white norm + SE_NET + focal_loss |
+|source|version|IMDB(mae)|WIKI(mae)|extra change| model|
+| -- | -- | :--: | :--: | :--:| :--: |
+| from papper | -- | **6.57** | **6.44** | -- | -- |
+| our implement | c3ae-v84 | **6.77** | **6.74** | change kl to focal loss without se_net|  model/imdb_focal_loss_c3ae_v84.h5 | model/c3ae_wiki_v87.h5 |
+| our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
+| our implement v3 | c3ae-v90 | **6.53**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
 
 ## structs
