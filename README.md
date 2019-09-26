@@ -14,7 +14,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
 | our implement v3 | c3ae-v90 | **6.51**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
-U can add gender prediction to the task if you want reach a lower mse. It cant decrease mse from 6.51 to 6.41.
+U can add gender prediction to the task if you want reach a lower mse. It cant decrease mae from 6.51 to 6.41.
 
 ## structs
    - assets 
