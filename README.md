@@ -47,18 +47,17 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
    - nets (all tainging code)
        - C3AE.py 
    - preproccessing (preprocess dataset), which contains "wiki" "imdb" "afad" "asia" "utk"
-
-## Pretain mode(a temp model)
+## Pretrain model(a temp model)
    >> all trainned  model saved in dir named "model"
 
 ## required enviroments:
    numpy, tensorflow(2.1), pandas, feather, opencv, python=3.6.5
    
-   >>> pip install -r requirements.txt
+   >>> pip install -r requirements2.1.txt
   
    numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
-   
-   >>> pip install -r requirements2.1.txt
+
+   >>> pip install -r requirements.txt
 
 ## test
  - for image
@@ -94,7 +93,7 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 ![ params ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/params.png) ![ plain_model ](https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/plain_model.png) 
 
 
-## Questions: 
+## Q&A: 
    - only 10 bins in paper: why we got 12 category: we can split it as "[0, 10, ... 110 ]" by two points!\
    - Conv5 1 * 1 * 32, has 1056 params, which mean 32 * 32 + 32. It contains a conv(1 * 1 * 32) with bias 
    - feat: change [4 * 4 * 32] to [12] with 6156 params.As far as known, it may be compose of  conv(6144+12) ,pooling and softmax.
