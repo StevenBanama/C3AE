@@ -23,7 +23,8 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 | our implement v4 | asia |age: 5.83 gender 0.955 | -- | --| ./model/c3ae_model_v2_117_5.830443-0.955 |
 | our implement v4 | asia+utk | -- | age: 5.2 gender 0.967 | --| ./model/c3ae_model_v2_91_5.681206-0.949 |
 | our implement v4 | asia+utk+afad |age: 5.9 gender 0.9234 | age: 5.789  gender: 0.9491 | age: 3.61 gender: 0.9827| ./model/c3ae_model_v2_151_4.301724-0.962|
-You can change weights of loss to improve age mae.
+
+ **You can change weights of loss to improve age mae, [1, 20, 20].
 >> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test 
 
 ## structs
@@ -61,8 +62,8 @@ You can change weights of loss to improve age mae.
  
 
 ## Preprocess:
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
     >>> python preproccessing/dataset_proc.py -i ./dataset/AFAD-Full --source afad 
 
 ## training: 
