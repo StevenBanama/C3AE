@@ -97,7 +97,7 @@ sklearn==0.0
 subprocess32==3.5.2
 tb-nightly==1.10.0a20180716
 tensorboard==1.8.0
-tensorflow==1.8.0
+tensorflow==1.15.2
 termcolor==1.1.0
 terminado==0.8.1
 testpath==0.4.2
