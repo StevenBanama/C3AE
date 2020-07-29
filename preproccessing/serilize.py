@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 
 class BaseProc:
 
-    def __init__(self, name, data_dir, output_dir, heads, overwrite=False, tf_dir="../data/", sample_rate=0.01):
+    def __init__(self, name, data_dir, output_dir, heads, overwrite=False, tf_dir="../data/", sample_rate=0.1):
         '''
             @name: proc name
             @data_dir: 预处理数据目录
@@ -99,7 +99,7 @@ class BaseProc:
             chunk_start += chunkSize
 
     def transtf_record(self, record_size=10000):
-        self.train_sets, self.test_sets = train_test_split(self.dataframe, test_size=self.sample_rate, random_state=2017)
+        self.train_sets, self.test_sets = train_test_split(self.dataframe, train_size=1 - self.sample_rate, test_size=self.sample_rate, random_state=2017)
         self.train_sets.reset_index(drop=True, inplace=True)
         self.test_sets.reset_index(drop=True, inplace=True)
         train_nums = self.train_sets.shape[0]

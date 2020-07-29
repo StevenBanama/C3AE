@@ -42,7 +42,7 @@ def tran_euler(rotation_vect):
 def trans_landmarks(img, landmark_groups):
     result = []
     for lm in landmark_groups:
-        landmarks = np.array([(lm[x], lm[5 + x],) for x in xrange(5)], dtype="double")
+        landmarks = np.array([(lm[x], lm[5 + x],) for x in range(5)], dtype="double")
         for p in landmarks:
             cv2.circle(img, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
         result.append(get_rotation_angle(img, landmarks))
@@ -50,7 +50,7 @@ def trans_landmarks(img, landmark_groups):
 
 def get_rotation_angle(img, landmarks, draw=False):
     # get four stander point for pnp
-    landmarks = np.array([(landmarks[x], landmarks[5 + x],) for x in xrange(5)], dtype="double") 
+    landmarks = np.array([(landmarks[x], landmarks[5 + x],) for x in range(5)], dtype="double") 
     landmarks = landmarks.astype(np.float32)
     landmarks[1] = (landmarks[0] + landmarks[1]) / 2.0
     landmarks = landmarks[1:]
@@ -72,7 +72,7 @@ def get_rotation_angle(img, landmarks, draw=False):
              [0, 0, 1]
          ], dtype=np.float32)
     dist_coeffs = np.zeros((4, 1))
-    (success, rotation_vector, trans_vector) = cv2.solvePnP(model_points, landmarks, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
+    (success, rotation_vector, trans_vector) = cv2.solvePnP(model_points, landmarks, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_EPNP)
     f_pitch, f_yaw, f_roll = tran_euler(rotation_vector)
 
     n_pitch = prod_trans_point((0, 0, 500.0), rotation_vector, trans_vector, camera_matrix, dist_coeffs)

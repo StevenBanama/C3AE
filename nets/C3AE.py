@@ -25,7 +25,7 @@ from sklearn.model_selection import train_test_split
 from keras.backend import argmax, pool2d
 from keras import backend as K
 from keras import regularizers
-from utils import focal_loss, ThresCallback
+from utils import focal_loss, ThresCallback, config_gpu
 
 
 def BRA(input):
@@ -42,7 +42,7 @@ def Concat(ins):
 def SE_BLOCK(input, using_SE=True, r_factor=2):
     if not using_SE:
         return input
-    channel_nums = input.get_shape()[-1].value
+    channel_nums = input.get_shape()[-1]
     ga_pooling = GlobalAveragePooling2D()(input)
     fc1 = Dense(channel_nums//r_factor)(ga_pooling)
     scale = Dense(channel_nums, activation=sigmoid)(ReLU()(fc1))
@@ -57,7 +57,7 @@ def KeepTopN(input, keep=2):
 
 def KeepMaxAdjactent(input, keep=2, axis=-1):
     dims = int(input.get_shape()[axis])
-    combine_val = tf.gather(input, [x for x in xrange(1, dims)], axis=axis) + tf.gather(input, [x for x in xrange(0, dims-1)], axis=axis)
+    combine_val = tf.gather(input, [x for x in range(1, dims)], axis=axis) + tf.gather(input, [x for x in range(0, dims-1)], axis=axis)
     indices = tf.argmax(combine_val, axis=axis)
     window_ind = tf.stack([indices, indices+1], axis=-1)
     print(window_ind)
@@ -119,26 +119,19 @@ def build_net(CATES=12, height=64, width=64, channel=3, using_white_norm=True, u
     y3 = base_model(x3)
 
     cfeat = Concatenate(axis=-1)([y1, y2, y3])
-    bulk_feat = Dense(CATES, use_bias=True, activity_regularizer=regularizers.l1(0), activation=softmax)(cfeat)
+    bulk_feat = Dense(CATES, use_bias=True, activity_regularizer=regularizers.l1(0), activation=softmax, name="W1")(cfeat)
     age = Dense(1, name="age")(bulk_feat)
-    #age = Lambda(lambda a: tf.reshape(tf.reduce_sum(a * tf.constant([[x * 10.0 for x in xrange(12)]]), axis=-1), shape=(-1, 1)), name="age")(bulk_feat)
+    #gender = Dense(2, activation=softmax, activity_regularizer=regularizers.l2(0), name="gender")(cfeat)
+
+    #age = Lambda(lambda a: tf.reshape(tf.reduce_sum(a * tf.constant([[x * 10.0 for x in range(12)]]), axis=-1), shape=(-1, 1)), name="age")(bulk_feat)
     return Model(input=[x1, x2, x3], output=[age, bulk_feat])
 
 def preprocessing(dataframes, batch_size=50, category=12, interval=10, is_training=True, dropout=0.):
     # category: bin + 2 due to two side
     # interval: age interval
-    from utils import generate_data_generator
-    return generate_data_generator(dataframes, category=category, interval=interval, batch_size=batch_size, is_training=is_training, dropout=dropout)
+    from utils import age_data_generator
+    return age_data_generator(dataframes, category=category, interval=interval, batch_size=batch_size, is_training=is_training, dropout=dropout)
 
-def config_gpu():
-    import tensorflow as tf
-    from keras.backend.tensorflow_backend import set_session
-
-    config = tf.ConfigProto()
-    config.gpu_options.allocator_type = 'BFC' #A "Best-fit with coalescing" algorithm, simplified from a version of dlmalloc.
-    config.gpu_options.per_process_gpu_memory_fraction = 0.8
-    config.gpu_options.allow_growth = True
-    set_session(tf.Session(config=config))
 
 def train(params):
     from utils import reload_data
@@ -152,7 +145,7 @@ def train(params):
     print(trainset.groupby(["age"])["age"].agg("count"))
 
     print(testset.groupby(["age"]).agg(["count"]))
-    age_dist = [trainset["age"][(trainset.age >= x -10) & (trainset.age <= x)].count() for x in xrange(10, 101, 10)]
+    age_dist = [trainset["age"][(trainset.age >= x -10) & (trainset.age <= x)].count() for x in range(10, 101, 10)]
     age_dist = [age_dist[0]] + age_dist + [age_dist[-1]]
     print(age_dist)
 
@@ -166,8 +159,10 @@ def train(params):
     models.compile(
         optimizer=adam,
         loss=["mae", focal_loss(age_dist)],  # "kullback_leibler_divergence"
+        #metrics={"age": "mae", "W1": "mae", "gender": "acc"},
         metrics={"age": "mae", "W1": "mae"},
         loss_weights=[1, params.weight_factor]
+        #loss_weights=[1, params.weight_factor, 5]
     )
     W2 = models.get_layer("age")
 
@@ -179,14 +174,9 @@ def train(params):
 
     callbacks = [
         ModelCheckpoint(params.save_path, monitor='val_age_mean_absolute_error', verbose=1, save_best_only=True, mode='min'),
-        ModelCheckpoint("train_" + params.save_path, monitor='age_mean_absolute_error', verbose=1, save_best_only=True, mode='min'),
-        TensorBoard(log_dir=params.log_dir, batch_size=batch_size, write_images=True, update_freq='epoch'),
-        #EarlyStopping(monitor='val_age_mean_absolute_error', patience=10, verbose=0, mode='min'),
-        #LearningRateScheduler(lambda epoch: lr - 0.0001 * epoch // 10),
-        ReduceLROnPlateau(monitor='val_age_mean_absolute_error', factor=0.1, patience=10, min_lr=0.00001),
-        LambdaCallback(on_epoch_end=get_weights)
+        #TensorBoard(log_dir=params.log_dir, batch_size=batch_size, write_images=True, update_freq='epoch'),
     ]
-    history = models.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=160, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
+    history = models.fit_generator(train_gen, steps_per_epoch=len(trainset) / batch_size, epochs=250, callbacks=callbacks, validation_data=validation_gen, validation_steps=len(testset) / batch_size * 3)
 
 
 def init_parse():

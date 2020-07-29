@@ -6,11 +6,36 @@ import feather
 import pandas as pd
 import numpy as np
 import random
+import math
 import tensorflow as tf
-from keras.callbacks import Callback
+from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import Callback
+from tensorflow.keras.layers import Layer
 
 #COLUMS = ["age", "gender", "image", "width", "height", "source", "md5"]
 COLUMS = ["age", "gender", "image", "org_box", "trible_box", "landmarks", "roll", "yaw", "pitch"]
+
+class MishActivation(Layer):
+
+    def __init__(self, **kwargs):
+        super(MishActivation, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        super(MishActivation, self).build(input_shape)
+
+    def call(self, x):
+        return x * tf.tanh(tf.math.log(1 + tf.exp(x)))
+
+class MishActivation6(Layer):
+
+    def __init__(self, **kwargs):
+        super(MishActivation6, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        super(MishActivation6, self).build(input_shape)
+
+    def call(self, x):
+        return tf.clip_by_value(x * tf.tanh(tf.math.log(1 + tf.exp(x))), -6., 6.)
 
 def reload_data(path_dir, file_ptn):
     dataset = pd.DataFrame(columns=COLUMS)
@@ -24,14 +49,14 @@ def reload_data(path_dir, file_ptn):
     dataframe = dataset
     dataframe = dataframe[(dataframe["age"] > 0) & (dataframe["age"] < 101)]
     dataframe = dataframe.dropna()
-    print(dataframe.shape)
+    print("---!!!!", path_dir, file_ptn, dataframe.shape)
     #dataframe = dataframe[(dataframe["yaw"] >-30) & (dataframe["yaw"] < 30) & (dataframe["roll"] >-20) & (dataframe["roll"] < 20) & (dataframe["pitch"] >-20) & (dataframe["pitch"] < 20) ]
     #return process_unbalance(dataframe)
     return dataframe
 
 def process_unbalance(dataframe, max_nums=500, random_seed=2019):
     sample = []
-    for x in xrange(100):
+    for x in range(100):
         age_set = dataframe[dataframe.age == x]
         cur_age_num = len(age_set)
         if cur_age_num > max_nums:
@@ -42,7 +67,7 @@ def process_unbalance(dataframe, max_nums=500, random_seed=2019):
 
 def two_point(age_label, category, interval=10, elips=0.000001):
     def age_split(age):
-        embed = [0 for x in xrange(0, category)]
+        embed = [0 for x in range(0, category)]
         right_prob = age % interval * 1.0 / interval
         left_prob = 1 - right_prob
         idx = age // interval
@@ -73,7 +98,7 @@ def get_normal_image(row, seed=100, shape=(96, 96), is_training=True):
     (idx, row) = row[0], row[1]
     img = np.fromstring(row["image"], np.uint8)
     img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-    img = image_enforcing(img, random.randint(0, 3))
+    img = image_enforcing(img, random.randint(0, 8))
     bbox = np.loads(row.org_box)
     img = img[bbox[0]:bbox[2], bbox[1]:bbox[3],:]
     img = cv2.resize(img, shape)
@@ -101,20 +126,20 @@ def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
         '''
         import tensorflow as tf
         from tensorflow.python.ops import array_ops
-        from keras import backend as K
 
         #1# get focal loss with no balanced weight which presented in paper function (4)
         zeros = array_ops.zeros_like(prediction_tensor, dtype=prediction_tensor.dtype)
         one_minus_p = array_ops.where(tf.greater(target_tensor,zeros), target_tensor - prediction_tensor, zeros)
-        FT = -1 * (one_minus_p ** gamma) * tf.log(tf.clip_by_value(prediction_tensor, 1e-8, 1.0))
+        FT = -1 * (one_minus_p ** gamma) * tf.math.log(tf.clip_by_value(prediction_tensor, 1e-8, 1.0))
 
         #2# get balanced weight alpha
         classes_weight = array_ops.zeros_like(prediction_tensor, dtype=prediction_tensor.dtype)
 
         total_num = float(sum(classes_num))
-        classes_w_t1 = [ total_num / ff for ff in classes_num ]
+        classes_w_t1 = [ (total_num / ff if ff != 0 else 0.0) for ff in classes_num ]
         sum_ = sum(classes_w_t1)
         classes_w_t2 = [ ff/sum_ for ff in classes_w_t1 ]   #scale
+        print(classes_w_t2)
         classes_w_tensor = tf.convert_to_tensor(classes_w_t2, dtype=prediction_tensor.dtype)
         classes_weight += classes_w_tensor
 
@@ -127,7 +152,7 @@ def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
         #4# add other op to prevent overfit
         # reference : https://spaces.ac.cn/archives/4493
         nb_classes = len(classes_num)
-        fianal_loss = (1-e) * balanced_fl + e * K.categorical_crossentropy(K.ones_like(prediction_tensor)/nb_classes, prediction_tensor)
+        fianal_loss = (1-e) * balanced_fl + e * K.categorical_crossentropy(K.ones_like(prediction_tensor) / nb_classes, prediction_tensor)
 
         return fianal_loss
     return focal_loss_fixed
@@ -144,7 +169,7 @@ def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotati
     cascad_imgs, padding = [], 200
     new_bd_img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_CONSTANT)
     height, width = img.shape[:2]
-    for bbox in np.loads(row.trible_box):
+    for bbox in np.loads(row.trible_box, encoding="bytes"):
         h_min, w_min = bbox[0]
         h_max, w_max = bbox[1]
         # cv2.rectangle(img, (h_min, w_min), (h_max, w_max), (0,0,255), 2)
@@ -155,19 +180,45 @@ def image_transform(row, seed=100, contrast=(0.5, 2.5), bright=(-50, 50), rotati
     #    cv2.imwrite("%s_%s_%s.jpg"%(row.age, row.gender, idx), cascad_imgs[2])
     if is_training:
        flag = random.randint(0, 3)
-       cascad_imgs = map(lambda x: image_enforcing(x, flag, contrast, bright, rotation), cascad_imgs)
+       contrast = random.uniform(0.5, 2.5)
+       bright = random.uniform(-50, 50)
+       rotation = random.randint(-15, 15)
+       
+       cascad_imgs = [image_enforcing(x, flag, contrast, bright, rotation) for x in cascad_imgs]
     return cascad_imgs
 
-def image_enforcing(img, flag=0, contrast=(0.5, 2.5), bright=(-50, 50), rotation=(-15, 15)):
-    if flag == 1:  # trans hue
-        #img = cv2.convertScaleAbs(img, alpha=random.uniform(*contrast), beta=random.uniform(*bright))
-        pass
-    elif flag == 2:  # rotation
+class CosineAnnealingScheduler(Callback):
+    """Cosine annealing scheduler.
+    """
+
+    def __init__(self, T_max, eta_max, eta_min=0, verbose=0):
+        super(CosineAnnealingScheduler, self).__init__()
+        self.T_max = T_max
+        self.eta_max = eta_max
+        self.eta_min = eta_min
+        self.verbose = verbose
+
+    def on_epoch_begin(self, epoch, logs=None):
+        if not hasattr(self.model.optimizer, 'lr'):
+            raise ValueError('Optimizer must have a "lr" attribute.')
+        lr = self.eta_min + (self.eta_max - self.eta_min) * (1 + math.cos(math.pi * epoch / self.T_max)) / 2
+        K.set_value(self.model.optimizer.lr, lr)
+        if self.verbose > 0:
+            print('\nEpoch %05d: CosineAnnealingScheduler setting learning '
+                  'rate to %s.' % (epoch + 1, lr))
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        logs['lr'] = K.get_value(self.model.optimizer.lr)
+
+def image_enforcing(img, flag, contrast, bright, rotation):
+    if flag & 1:  # trans hue
+        img = cv2.convertScaleAbs(img, alpha=contrast, beta=bright)
+    elif flag & 2:  # rotation
         height, width = img.shape[:-1]
-        matRotate = cv2.getRotationMatrix2D((height, width), random.randint(-15, 15), 1) # mat rotate 1 center 2 angle 3 缩放系数
+        matRotate = cv2.getRotationMatrix2D((height // 2, width // 2), rotation, 1) # mat rotate 1 center 2 angle 3 缩放系数
         img = cv2.warpAffine(img, matRotate, (height, width))
-        pass
-    elif flag == 3:  # flp 翻转
+    elif flag & 4:  # flp 翻转
         img = cv2.flip(img, 1)
     return img
 
@@ -178,34 +229,58 @@ def padding_image(img, padding=0.1):
     img = img[p_top:width-p_left, p_top:height-p_top,:]
     return img
 
+def smooth_label(labels, cls_num, on_value=0.99, epsilon=1e-8):
+    from keras.utils.np_utils import to_categorical
+    if not (0 <= on_value <= 1 and cls_num > 1):
+        raise Exception("fatal params on smooth")
+    onehot = to_categorical(labels, 2)
+    return np.where(onehot > 0, on_value, (1 - on_value) / (cls_num - 1 + epsilon))
+
+def config_cpu():
+    tf.get_logger().setLevel('ERROR')
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+def config_gpu():
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+       try:
+           # Currently, memory growth needs to be the same across GPUs
+           for gpu in gpus:
+               tf.config.experimental.set_memory_growth(gpu, True)
+       except RuntimeError as e:
+           # Memory growth must be set before GPUs have been initialized
+           print(e)
+
+
 def generate_data_generator(dataframe, batch_size=32, category=12, interval=10, is_training=True, dropout=0.):
     dataframe = dataframe.reset_index(drop=True)
     all_nums = len(dataframe)
+    from keras.utils.np_utils import to_categorical
     while True:
         idxs = np.random.permutation(all_nums)
         start = 0
         while start + batch_size < all_nums:
-            candis = dataframe.loc[list(idxs[start:start+batch_size])]
-            imgs = np.array(map(lambda x: image_transform(x, is_training=is_training, dropout=dropout), candis.iterrows()))
-            out2 = [candis.age.to_numpy(), np.array(map(lambda x: two_point(x, category, interval), candis.age.to_numpy()))]
+            candis = dataframe.ix[list(idxs[start:start+batch_size])]
+            imgs = np.array([image_transform(x, is_training=is_training, dropout=dropout) for x in candis.iterrows()])
+            gender = smooth_label(candis.gender.to_numpy(), 2, 0.99)
+            out2 = [candis.age.to_numpy(), np.array([two_point(x, category, interval) for x in candis.age.to_numpy()]), gender]
             yield [imgs[:,0], imgs[:,1], imgs[:,2]], out2
             start += batch_size
 
-def generate_category_generator(dataframe, batch_size=32, category=12, interval=10, is_training=True, dropout=0.):
-    from keras.utils import to_categorical
+def age_data_generator(dataframe, batch_size=32, category=12, interval=10, is_training=True, dropout=0.):
     dataframe = dataframe.reset_index(drop=True)
     all_nums = len(dataframe)
+    from keras.utils.np_utils import to_categorical
     while True:
         idxs = np.random.permutation(all_nums)
         start = 0
         while start + batch_size < all_nums:
-            candis = dataframe.loc[list(idxs[start:start+batch_size])]
-            imgs = np.array(map(lambda x: get_normal_image(x), candis.iterrows()))
-            out2 = [to_categorical(candis.gender, num_classes=2), to_categorical(candis.age, num_classes=100), to_categorical(candis.age, num_classes=100)]
-            yield imgs, out2
+            candis = dataframe.ix[list(idxs[start:start+batch_size])]
+            imgs = np.array([image_transform(x, is_training=is_training, dropout=dropout) for x in candis.iterrows()])
+            out2 = [candis.age.to_numpy(), np.array([two_point(x, category, interval) for x in candis.age.to_numpy()])]
+            yield [imgs[:,0], imgs[:,1], imgs[:,2]], out2
             start += batch_size
-
-
 
 if __name__ == "__main__":
     #cv2.imwrite("%s.jpg"%idx, ig)

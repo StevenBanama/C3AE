@@ -2,6 +2,19 @@
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
+Update History:
+2019-9 C3AE org
+2020-7 transfer to tensorflow2.1 and exposing gender branch.
+     1.add gender prediction
+     2.change neck
+     3.add Mish6, GeM, Smooth label and so on.
+     4.add utk, afad, asia dataset
+     5.add tflite freezing
+
+To-Do:
+    1.anchor free boundbox
+    2.add another new feathers
+
 --------[result]-----------------
 <div>
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
@@ -14,6 +27,16 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
 | our implement v3 | c3ae-v90 | **6.51**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
+Part2 add gender branch
+Triple-Boxes show much influence with different dataset, meanwhile the distribution plays an important role. 
+
+|source|version| asia| utk| afad | model|
+| -- | -- | -- | -- | -- | -- |
+| our implement v4 | asia |age: 5.83 gender 0.955 | -- | --| ./model/c3ae_model_v2_117_5.830443-0.955 |
+| our implement v4 | asia+utk | -- | age: 5.2 gender 0.967 | --| ./model/c3ae_model_v2_91_5.681206-0.949 |
+| our implement v4 | asia+utk+afad |age: 5.9 gender 0.9234 | age: 5.789  gender: 0.9491 | age: 3.61 gender: 0.9827| ./model/c3ae_model_v2_151_4.301724-0.962|
+
+>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test  
 
 ## structs
    - assets 
@@ -23,15 +46,19 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - model (pretrain model will be here)
    - nets (all tainging code)
        - C3AE.py 
-   - preproccessing (preprocess dataset)
+   - preproccessing (preprocess dataset), which contains "wiki" "imdb" "afad" "asia" "utk"
 
 ## Pretain mode(a temp model)
    >> all trainned  model saved in dir named "model"
 
 ## required enviroments:
-   numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
+   numpy, tensorflow(2.1), pandas, feather, opencv, python=3.6.5
    
    >>> pip install -r requirements.txt
+  
+   numpy, tensorflow(1.8), pandas, feather, opencv, python=2.7
+   
+   >>> pip install -r requirements2.1.txt
 
 ## test
  - for image
@@ -49,14 +76,15 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 ## Preprocess:
     >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
     >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/AFAD-Full --source afad 
 
 ## training: 
     plain net
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10
     with se-net and white-norm (better result)
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10 -white -se
-
-
+    for gender and age prediction:
+    >>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_92_4.437156-0.963 
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
@@ -71,10 +99,8 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
    - Conv5 1 * 1 * 32, has 1056 params, which mean 32 * 32 + 32. It contains a conv(1 * 1 * 32) with bias 
    - feat: change [4 * 4 * 32] to [12] with 6156 params.As far as known, it may be compose of  conv(6144+12) ,pooling and softmax.
    - the distribution of imdb and wiki are unbalanced, that`s why change the KL loss to focal loss
+   - gender prediction: detail in nets/C3AE_expand.py
 
-## puzzlement:
-  - the result of the feature layer(W2) is far from expected. Maybe our code exists some error.
-  
 ## Reference
   - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
   - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection

@@ -1,6 +1,7 @@
 import sys
 sys.path.append("./")
 from C3AE import *
+from C3AE_tf import build_net3 
 import mxnet as mx
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
 from preproccessing.dataset_proc import gen_face, gen_boundbox
@@ -12,6 +13,14 @@ def load_C3AE(pretrain_path="model/imdb_focal_loss_c3ae_v84.h5"):
         "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss([1] * 12),
         "white_norm": white_norm})
     return models
+
+def load_C3AE2(pretrain_path="model/imdb_focal_loss_c3ae_v84.h5"):
+    models = build_net3(12, using_SE=True, using_white_norm=True)
+    if pretrain_path:
+        #models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss(age_dist)})
+        models.load_weights(pretrain_path)
+    return models
+
 
 def predict(models, img, save_image=False):
     try:
@@ -54,7 +63,7 @@ def predict(models, img, save_image=False):
 
 def test_img(params):
     img = cv2.imread(params.image)
-    models = load_C3AE(params.model_path)
+    models = load_C3AE2(params.model_path)
     predict(models, img, True)
 
 def video(params):
