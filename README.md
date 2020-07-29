@@ -7,6 +7,16 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 <div>
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
 </div>
+### Update History:
+
+- 2019-9 C3AE org
+- 2020-7 transfer to tensorflow2.1 and exposing gender branch.
+    - 1.add gender prediction
+    - 2.change neck
+    - 3.add Mish6, GeM, Smooth label and so on.
+    - 4.add utk, afad, asia dataset
+    - 5.add tflite freezing
+
 ### age branch
 
 |source|version|IMDB(mae)|WIKI(mae)|extra change| model|
@@ -94,14 +104,6 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
    - the distribution of imdb and wiki are unbalanced, that`s why change the KL loss to focal loss
    - gender prediction: detail in nets/C3AE_expand.py
 
-### Update History:
-2019-9 C3AE org
-2020-7 transfer to tensorflow2.1 and exposing gender branch.
-    - 1.add gender prediction
-    - 2.change neck
-    - 3.add Mish6, GeM, Smooth label and so on.
-    - 4.add utk, afad, asia dataset
-    - 5.add tflite freezing
 ### To-Do:
     - 1.anchor free boundbox
     - 2.add another new feathers
