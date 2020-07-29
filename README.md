@@ -2,18 +2,6 @@
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
-Update History:
-2019-9 C3AE org
-2020-7 transfer to tensorflow2.1 and exposing gender branch.
-     1.add gender prediction
-     2.change neck
-     3.add Mish6, GeM, Smooth label and so on.
-     4.add utk, afad, asia dataset
-     5.add tflite freezing
-
-To-Do:
-    1.anchor free boundbox
-    2.add another new feathers
 
 --------[result]-----------------
 <div>
@@ -35,8 +23,8 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 | our implement v4 | asia |age: 5.83 gender 0.955 | -- | --| ./model/c3ae_model_v2_117_5.830443-0.955 |
 | our implement v4 | asia+utk | -- | age: 5.2 gender 0.967 | --| ./model/c3ae_model_v2_91_5.681206-0.949 |
 | our implement v4 | asia+utk+afad |age: 5.9 gender 0.9234 | age: 5.789  gender: 0.9491 | age: 3.61 gender: 0.9827| ./model/c3ae_model_v2_151_4.301724-0.962|
-
->> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test  
+You can change weights of loss to improve age mae.
+>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test 
 
 ## structs
    - assets 
@@ -84,6 +72,9 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10 -white -se
     for gender and age prediction:
     >>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_92_4.437156-0.963 
+    
+## freeze tflite
+    python nets/C3AE_expand.py -se --source "asia" -gpu -p  ./model/c3ae_model_v2_92_4.437156-0.963 -fz
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
@@ -100,6 +91,18 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
    - the distribution of imdb and wiki are unbalanced, that`s why change the KL loss to focal loss
    - gender prediction: detail in nets/C3AE_expand.py
 
+### Update History:
+2019-9 C3AE org
+2020-7 transfer to tensorflow2.1 and exposing gender branch.
+    - 1.add gender prediction
+    - 2.change neck
+    - 3.add Mish6, GeM, Smooth label and so on.
+    - 4.add utk, afad, asia dataset
+    - 5.add tflite freezing
+### To-Do:
+    - 1.anchor free boundbox
+    - 2.add another new feathers
+    
 ## Reference
   - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
   - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
