@@ -7,7 +7,7 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 <div>
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
 </div>
-
+### age branch
 |source|version|IMDB(mae)|WIKI(mae)|extra change| model|
 | -- | -- | :--: | :--: | :--:| :--: |
 | from papper | -- | **6.57** | **6.44** | -- | -- |
@@ -15,7 +15,8 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
 | our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
 | our implement v3 | c3ae-v90 | **6.51**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
-Part2 add gender branch
+
+###Part2 add gender branch
 Triple-Boxes show much influence with different dataset, meanwhile the distribution plays an important role. 
 
 |source|version| asia| utk| afad | model|
