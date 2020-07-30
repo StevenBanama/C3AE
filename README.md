@@ -77,15 +77,18 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
    >>> python nets/test.py -v -se -m model/c3ae_imdb_v89.h5
 
 
-##  Preparation
+##  Preparation Datasets
 *download*  imdb/wiki dataset and then *extract* those data to the "./dataset/" \
  [download wiki]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar) 
  [download imdb]( https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/imdb_crop.tar)
+ [download asia]( https://github.com/JingchunCheng/All-Age-Faces-Dataset)
+ [download utk]( https://susanqq.github.io/UTKFace/)
+ [download afad]( https://github.com/afad-dataset/tarball)
  
 
 ## Preprocess:
-    >>> python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
-    >>> python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki
+    >>> python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb
     >>> python preproccessing/dataset_proc.py -i ./dataset/AFAD-Full --source afad 
 
 ## training: 
