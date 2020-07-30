@@ -2,23 +2,23 @@
 
 This is a unofficial keras implements of c3ae for age estimation. welcome to discuss ~ 
 
-Update History:
-2019-9 C3AE org
-2020-7 transfer to tensorflow2.1 and exposing gender branch.
-     1.add gender prediction
-     2.change neck
-     3.add Mish6, GeM, Smooth label and so on.
-     4.add utk, afad, asia dataset
-     5.add tflite freezing
-
-To-Do:
-    1.anchor free boundbox
-    2.add another new feathers
 
 --------[result]-----------------
 <div>
 <img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example1.jpg" width="200" height="200"><img src="https://raw.githubusercontent.com/StevenBanama/C3AE/master/assets/example2.jpg" width="200" height="200">
 </div>
+
+### Update History:
+
+- 2019-9 C3AE org
+- 2020-7 transfer to tensorflow2.1 and exposing gender branch.
+    - 1.add gender prediction
+    - 2.change neck
+    - 3.add Mish6, GeM, Smooth label and so on.
+    - 4.add utk, afad, asia dataset
+    - 5.add tflite freezing
+
+### Part1 age branch
 
 |source|version|IMDB(mae)|WIKI(mae)|extra change| model|
 | -- | -- | :--: | :--: | :--:| :--: |
@@ -27,7 +27,8 @@ To-Do:
 | our implement v2 | c3ae-v89 | **6.58** | -- | SE_NET + focal_loss | model/c3ae_imdb_v89.h5 |
 | our implement v3 | c3ae-v90 | **6.51**| -- | white norm + SE_NET + focal_loss | mail to geekpeakspar@gmail.com |
 
-Part2 add gender branch
+
+### Part2 add gender branch
 Triple-Boxes show much influence with different dataset, meanwhile the distribution plays an important role. 
 
 |source|version| asia| utk| afad | model|
@@ -38,7 +39,8 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 
 cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
 
->> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test  
+ **You can change weights of loss to improve age mae, [1, 20, 20].
+>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test 
 
 ## structs
    - assets 
@@ -82,8 +84,8 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
  
 
 ## Preprocess:
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
-    >>>  python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/wiki_crop --source wiki -white -se
+    >>> python preproccessing/dataset_proc.py -i ./dataset/imdb_crop --source imdb -white -se
     >>> python preproccessing/dataset_proc.py -i ./dataset/AFAD-Full --source afad 
 
 ## training: 
@@ -93,6 +95,9 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10 -white -se
     for gender and age prediction:
     >>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_92_4.437156-0.963 
+    
+## freeze tflite
+    python nets/C3AE_expand.py -se --source "asia" -gpu -p  ./model/c3ae_model_v2_92_4.437156-0.963 -fz
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
@@ -109,6 +114,10 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
    - the distribution of imdb and wiki are unbalanced, that`s why change the KL loss to focal loss
    - gender prediction: detail in nets/C3AE_expand.py
 
+### To-Do:
+    - 1.anchor free boundbox
+    - 2.add another new feathers
+    
 ## Reference
   - focal loss: https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
   - mtcnn: https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection
