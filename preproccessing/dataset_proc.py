@@ -15,7 +15,7 @@ import pandas as pd
 import tensorflow as tf
 import logging
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
-from serilize import BaseProc
+from .serilize import BaseProc
 from pose import get_rotation_angle
 
 '''
@@ -23,6 +23,8 @@ from pose import get_rotation_angle
     所有数据固化传输以feather(), feather文件不能超过2g需要做分片
 '''
 COLUMS = ["age", "gender", "image", "org_box", "trible_box", "landmarks", "roll", "yaw", "pitch"]
+FEMALE = 0
+MALE = 1
 
 def calc_age(taken, dob):
     birth = datetime.fromordinal(max(int(dob) - 366, 1))
@@ -67,6 +69,7 @@ class ProfileProc(BaseProc):
         logging.info("not implemented %s"%sub_dir)
 
 class WikiProc(ProfileProc):
+    # 0 for female and 1 for male
 
     def __init__(self, data_dir, output_dir, mat_file="wiki.mat", *args, **kwargs):
         ProfileProc.__init__(self, "wiki", data_dir, output_dir, *args, **kwargs)
@@ -158,6 +161,8 @@ class WikiProc(ProfileProc):
 
 
 class ImdbProc(WikiProc):
+    # 0 for female and 1 for male
+
     def __init__(self, data_dir, output_dir, mat_file="imdb.mat", *args, **kwargs):
         ProfileProc.__init__(self, "imdb", data_dir, output_dir, *args, **kwargs)
         self.mat_file=mat_file
@@ -217,7 +222,7 @@ class UTKProc(AsiaProc):
                 if not match:
                     continue
                 age, gender, race = match.groups() 
-                gender = 1 if gender == "0" else 0  # 0: female 1: male to 0:male 1: female
+                gender = MALE if gender == "0" else FEMALE  # 0: female 1: male to 0:male
                 age = int(age)
                 paths.append(path)
                 genders.append(gender)
@@ -236,8 +241,8 @@ class AFADProc(AsiaProc):
     def read_dir(self, nums=-1, ptn="(\d+)/(\d+)/.*?jpg$"):
         '''
             group(1): age
-            group(2): gender 0: man 1: female
-            group(3): race is an integer from 0 to 4, denoting White, Black, Asian, Indian, and Others (like Hispanic, Latino, Middle Eastern)
+            group(2): 112: female 111: male
+
         '''
         paths, genders, ages = [], [], []
         face_scores, second_face_scores = [], [] 
@@ -248,7 +253,7 @@ class AFADProc(AsiaProc):
                 if not match:
                     continue
                 age, gender = match.groups() 
-                gender = 1 if gender == "112" else 0  # 112: female 111: male to 0:male 1: female
+                gender = FEMALE if gender == "112" else MALE  # 112: female 111: male
                 age = int(age)
                 paths.append(path)
                 genders.append(gender)

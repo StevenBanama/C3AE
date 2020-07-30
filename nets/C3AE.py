@@ -150,7 +150,9 @@ def train(params):
     print(age_dist)
 
     if params.pretrain_path and os.path.exists(params.pretrain_path):
-        models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss(age_dist)})
+        #models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss(age_dist)})
+        models = build_net(category, using_SE=params.se_net, using_white_norm=params.white_norm)
+        models.load_weights(params.pretrain_path)
     else:
         models = build_net(category, using_SE=params.se_net, using_white_norm=params.white_norm)
     adam = Adam(lr=lr)
@@ -160,7 +162,7 @@ def train(params):
         optimizer=adam,
         loss=["mae", focal_loss(age_dist)],  # "kullback_leibler_divergence"
         #metrics={"age": "mae", "W1": "mae", "gender": "acc"},
-        metrics={"age": "mae", "W1": "mae"},
+        metrics={"age": "mae"},
         loss_weights=[1, params.weight_factor]
         #loss_weights=[1, params.weight_factor, 5]
     )

@@ -36,6 +36,8 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 | our implement v4 | asia+utk | -- | age: 5.2 gender 0.967 | --| ./model/c3ae_model_v2_91_5.681206-0.949 |
 | our implement v4 | asia+utk+afad |age: 5.9 gender 0.9234 | age: 5.789  gender: 0.9491 | age: 3.61 gender: 0.9827| ./model/c3ae_model_v2_151_4.301724-0.962|
 
+cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
+
 >> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test  
 
 ## structs
@@ -60,10 +62,17 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
    >>> pip install -r requirements.txt
 
 ## test
+ ### age and gender branch(only for py3 and tensorflow2+)
  - for image
-   >>> python nets/test.py -i assets/timg.jpg
+   >>> python nets/test.py -g -se -i assets/timg.jpg -m ./model/c3ae_model_v2_151_4.301724-0.962
  - for video
-   >>> python nets/test.py -v
+   >>> python nets/test.py -g -v -se -m ./model/c3ae_model_v2_151_4.301724-0.962
+
+ ### age branch
+ - for image
+   >>> python nets/test.py -se -i assets/timg.jpg -m model/c3ae_imdb_v89.h5
+ - for video
+   >>> python nets/test.py -v -se -m model/c3ae_imdb_v89.h5
 
 
 ##  Preparation
