@@ -1,6 +1,7 @@
 import sys
 sys.path.append("./")
 import cv2
+import numpy as np
 import mxnet as mx
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
 from preproccessing.dataset_proc import gen_face, gen_boundbox
@@ -25,23 +26,23 @@ def load_C3AE(params):
     return models
 
 def load_C3AE2(params):
-    from C3AE_expand import build_net3 
+    from C3AE_expand import build_net3, model_refresh_without_nan 
     models = build_net3(12, using_SE=params.se_net, using_white_norm=params.white_norm)
     if params.model_path:
         models.load_weights(params.model_path)
+        model_refresh_without_nan(models) ## hot fix which occur non-scientice gpu or cpu
     return models
 
 def predict(models, img, save_image=False):
     try:
-        bounds, lmarks = gen_face(MTCNN_DETECT, img)
+        bounds, lmarks = gen_face(MTCNN_DETECT, img, only_one=False)
         ret = MTCNN_DETECT.extract_image_chips(img, lmarks, padding=0.4)
     except Exception as ee:
         ret = None
         print(img.shape, ee)
     if not ret:
         print("no face")
-        return img
-    print(bounds, lmarks)
+        return img, None
     padding = 200
     new_bd_img = cv2.copyMakeBorder(img, padding, padding, padding, padding, cv2.BORDER_CONSTANT)
     bounds, lmarks = bounds, lmarks
@@ -67,17 +68,17 @@ def predict(models, img, save_image=False):
         age, gender = None, None
         if result and len(result) == 3:
             age, _, gender = result
-            age_label, gender_label = age[-1][-1], "female" if gender[-1][0] > gender[-1][1] else "male"
+            age_label, gender_label = age[-1][-1], "F" if gender[-1][0] > gender[-1][1] else "M"
         elif result and len(result) == 2:
             age, _  = result
             age_label, gender_label = age[-1][-1], "unknown"
         else:
            raise Exception("fatal result: %s"%result)
-        cv2.putText(new_bd_img, 'age:%s gender: %s'%(age_label, gender_label), (int(bounds[pidx][0]), int(bounds[pidx][2])), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (25, 2, 175), 2)
+        cv2.putText(new_bd_img, '%s %s'%(int(age_label), gender_label), (padding + int(bounds[pidx][0]), padding + int(bounds[pidx][1])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (25, 2, 175), 2)
     if save_image:
         print(result)
         cv2.imwrite("igg.jpg", new_bd_img)
-    return new_bd_img
+    return new_bd_img, (age_label, gender_label)
 
 def test_img(params):
     img = cv2.imread(params.image)
@@ -96,11 +97,42 @@ def video(params):
 
         if not ret:
             continue
-        img = predict(models, img) 
+        img, _ = predict(models, img) 
         if img is not None:
             cv2.imshow("result", img)
         if cv2.waitKey(3) == 27:
             break
+
+def load_csv(file_path):
+    import base64
+    result = []
+    with open(file_path, "r") as fd:
+        lines = fd.readlines()
+        for line in lines:
+            num, gender, img_str = line.split(",")
+            arr = base64.b64decode(img_str)
+            content = np.frombuffer(arr, np.uint8)
+            cv_image = cv2.imdecode(content, 1)
+            result.append((gender, cv_image))
+    return result
+
+def load_local_ano(params):
+    result = load_csv("fb4df376a1244c2e2b3f9384ef3bace5.csv")
+    models = load_branch(params)
+    counter, skip = 0, 0
+    for idx, (gender, img) in enumerate(result):
+        img, labels = predict(models, img, True)
+        if labels is None:
+            skip += 1
+            continue
+        age, pgender = labels
+        print("!!!,", pgender)
+        if (gender == "male" and pgender == "F") or (gender == "female" and pgender == "M"):
+            cv2.imwrite("online/%s_%s_%s.jpg"%(idx, gender, pgender), img)
+        else:
+            counter += 1
+        print(gender, pgender)
+    print("%s/ %s /%s"%(counter, skip, len(result)))
 
 def init_parse():
     import argparse
@@ -136,6 +168,7 @@ def init_parse():
 
 if __name__ == "__main__":
     params = init_parse()
+    #load_local_ano(params)
     if params.video:
         video(params)
     else:

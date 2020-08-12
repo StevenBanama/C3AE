@@ -25,7 +25,7 @@ from tensorflow.keras import regularizers
 from tensorflow.keras.backend import l2_normalize
 from tensorflow.keras import backend as K
 from tensorflow.keras.constraints import unit_norm
-from utils import focal_loss, ThresCallback, CosineAnnealingScheduler, MishActivation, MishActivation6, config_cpu, config_gpu
+from utils import focal_loss, ThresCallback, CosineAnnealingScheduler, MishActivation, MishActivation6, config_cpu, config_gpu, model_refresh_without_nan
 
 
 
@@ -213,12 +213,15 @@ def preprocessing(dataframes, batch_size=64, category=12, interval=10, is_traini
 
 def train(params):
     from utils import reload_data
+    if params.fp16:
+        os.environ['TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_IGNORE_PERFORMANCE'] = '1'
+
     sample_rate, seed, batch_size, category, interval = 0.8, 2019, params.batch_size, params.category + 2, int(math.ceil(100. / params.category))
     lr = params.learning_rate
     data_dir, file_ptn = params.dataset, params.source
     dataframes = reload_data(data_dir, file_ptn)
-    print("------", len(dataframes))
     trainset, testset = train_test_split(dataframes, train_size=sample_rate, test_size=1-sample_rate, random_state=seed)
+    print(testset.gender)
     train_gen = preprocessing(trainset, dropout=params.dropout, category=category, interval=interval)
     validation_gen = preprocessing(testset, dropout=0, is_training=False, category=category, interval=interval)
     print(trainset.groupby(["age"])["age"].agg("count"))
@@ -229,12 +232,11 @@ def train(params):
     gender_dist = [trainset["gender"][trainset.gender == 0].count(), trainset["gender"][trainset.gender == 1].count()]
     print(age_dist, gender_dist)
 
-
     models = build_net3(category, using_SE=params.se_net, using_white_norm=params.white_norm)
     if params.pretrain_path:
         #models = load_model(params.pretrain_path, custom_objects={"pool2d": pool2d, "ReLU": ReLU, "BatchNormalization": BatchNormalization, "tf": tf, "focal_loss_fixed": focal_loss(age_dist)})
-        models.load_weights(params.pretrain_path)
-        print("load!!!")
+        ret = models.load_weights(params.pretrain_path)
+        model_refresh_without_nan(models)
 
     #optim = SGD(lr=lr, momentum=0.9)
     if params.freeze:
@@ -248,6 +250,8 @@ def train(params):
 
     epoch_nums = 160
     optim = Adam(lr=lr)
+    if params.fp16:
+        optim = tf.train.experimental.enable_mixed_precision_graph_rewrite(optim)
 
     print("-----outputs-----", models.outputs)
 
@@ -280,7 +284,7 @@ def init_parse():
     parser = argparse.ArgumentParser(
         description='C3AE retry')
     parser.add_argument(
-        '-s', '--save_path', default="./model/c3ae_model_v2_{epoch}_{val_age_mae:02f}-{val_gender_acc:.3f}", type=str,
+        '-s', '--save_path', default="./model/c3ae_model_v2_$message$_{epoch}_{val_age_mae:02f}-{val_gender_acc:.3f}", type=str,
         help='the best model to save')
     parser.add_argument(
         '-l', '--log_dir', default="./logs", type=str,
@@ -347,7 +351,14 @@ def init_parse():
         '-lr', '--learning-rate', default="0.002", type=float,
         help='learning rate')
 
+    parser.add_argument(
+        '-fp16', dest="fp16", action='store_true',
+        help='mix precision training')
+
+
     params = parser.parse_args()
+    params.save_path = params.save_path.replace("$message$", params.message)
+    print("!!-----", params.save_path)
     config_gpu() if params.gpu else config_cpu()
     return params
 

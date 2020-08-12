@@ -116,6 +116,32 @@ class ThresCallback(Callback):
         if K.get_value(self.watch_dog) <= thres:
              K.set_value(self.candi, val)
 
+def model_refresh_without_nan(models):
+    import numpy as np                                                                                                                 
+    valid_weights = []
+    for l in models.get_weights():                                                                                                     
+        if np.isnan(l).any():
+            valid_weights.append(np.nan_to_num(l))
+            print("!!!!!", l)
+        else:
+            valid_weights.append(l) 
+    models.set_weights(valid_weights)
+
+
+def model_refresh_without_nan(models):
+    '''
+        https://github.com/tensorflow/tensorflow/issues/38698
+    '''
+    import numpy as np                                                                                                                 
+    valid_weights = []                                                                                                                 
+    for l in models.get_weights():                                                                                                     
+        if np.isnan(l).any():
+            print("!!!!!", l)
+            valid_weights.append(np.nan_to_num(l))                                                                                     
+        else:                                                                                                                          
+            valid_weights.append(l)
+    models.set_weights(valid_weights)
+
 def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
     # classes_num contains sample number of each classes
     # copy from https://github.com/maozezhong/focal_loss_multi_class/blob/master/focal_loss.py
@@ -130,7 +156,7 @@ def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
         #1# get focal loss with no balanced weight which presented in paper function (4)
         zeros = array_ops.zeros_like(prediction_tensor, dtype=prediction_tensor.dtype)
         one_minus_p = array_ops.where(tf.greater(target_tensor,zeros), target_tensor - prediction_tensor, zeros)
-        FT = -1 * (one_minus_p ** gamma) * tf.math.log(tf.clip_by_value(prediction_tensor, 1e-8, 1.0))
+        FT = -1 * (one_minus_p ** gamma) * tf.math.log(tf.clip_by_value(prediction_tensor, 1e-6, 1.0))
 
         #2# get balanced weight alpha
         classes_weight = array_ops.zeros_like(prediction_tensor, dtype=prediction_tensor.dtype)
@@ -153,7 +179,6 @@ def focal_loss(classes_num, gamma=2., alpha=.25, e=0.1):
         # reference : https://spaces.ac.cn/archives/4493
         nb_classes = len(classes_num)
         fianal_loss = (1-e) * balanced_fl + e * K.categorical_crossentropy(K.ones_like(prediction_tensor) / nb_classes, prediction_tensor)
-
         return fianal_loss
     return focal_loss_fixed
 
@@ -237,11 +262,16 @@ def smooth_label(labels, cls_num, on_value=0.99, epsilon=1e-8):
     return np.where(onehot > 0, on_value, (1 - on_value) / (cls_num - 1 + epsilon))
 
 def config_cpu():
-    tf.get_logger().setLevel('ERROR')
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    #os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    #tf.get_logger().setLevel('ERROR')
+    try:
+        tf.config.experimental.set_visible_devices([], 'GPU')
+    except Exception as ee:
+        print(ee)
 
 def config_gpu():
+    tf.get_logger().setLevel('ERROR')
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
        try:

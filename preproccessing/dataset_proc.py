@@ -3,6 +3,7 @@ import sys
 
 import argparse
 import os
+sys.path.append("./preproccessing/")
 import re
 import time
 from datetime import datetime
@@ -15,7 +16,7 @@ import pandas as pd
 import tensorflow as tf
 import logging
 from detect.mx_mtcnn.mtcnn_detector import MtcnnDetector
-from .serilize import BaseProc
+from serilize import BaseProc
 from pose import get_rotation_angle
 
 '''
@@ -48,12 +49,12 @@ def gen_boundbox(box, landmark):
         [(nose_x - w//2, nose_y - w//2), (nose_x + w//2, nose_y + w//2)]  # inner box
     ])
 
-def gen_face(detector, image, image_path=""):
+def gen_face(detector, image, image_path="", only_one=True):
     ret = detector.detect_face(image) 
     if not ret:
         raise Exception("cant detect facei: %s"%image_path)
     bounds, lmarks = ret
-    if len(bounds) > 1:
+    if only_one and len(bounds) > 1:
         print("!!!!!,", bounds, lmarks)
         raise Exception("more than one face %s"%image_path)
     return ret
@@ -62,8 +63,9 @@ MTCNN_DETECT = MtcnnDetector(model_folder=None, ctx=mx.cpu(0), num_worker=1, min
 
 class ProfileProc(BaseProc):
 
-    def __init__(self, name, data_dir, output_dir, overwrite=False, tf_dir="../data/", sample_rate=0.25):
+    def __init__(self, name, data_dir, output_dir, overwrite=False, tf_dir="../data/", sample_rate=0.25, extra_padding=0):
         BaseProc.__init__(self, name, data_dir, output_dir, COLUMS, overwrite, tf_dir, sample_rate)
+        self.extra_padding = extra_padding
 
     def _trans2tf_record(self, dataframe, trunck_num, sub_dir="train"):
         logging.info("not implemented %s"%sub_dir)
@@ -112,6 +114,9 @@ class WikiProc(ProfileProc):
         try:
             print(image_path)
             image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+            if self.extra_padding:
+                extra_padding = self.extra_padding
+                image = cv2.copyMakeBorder(image, extra_padding, extra_padding, extra_padding, extra_padding, cv2.BORDER_CONSTANT)
             if not np.isnan(series.second_face_score):
                 raise Exception("secend face is not None~---%s~-%s- %s"%(series.name, series.age, image_path))
             bounds, lmarks = gen_face(detector, image, image_path)
@@ -183,7 +188,7 @@ class AsiaProc(WikiProc):
                 if not match:
                     continue
                 identity_id, age = match.groups() 
-                gender = 0 if int(identity_id) <= 7380 else 1  # 0: female 1: male
+                gender = FEMALE if int(identity_id) <= 7380 else MALE  # 0: female 1: male
                 paths.append(path)
                 genders.append(gender)
                 ages.append(int(age))
@@ -222,7 +227,7 @@ class UTKProc(AsiaProc):
                 if not match:
                     continue
                 age, gender, race = match.groups() 
-                gender = MALE if gender == "0" else FEMALE  # 0: female 1: male to 0:male
+                gender = MALE if gender == "0" else FEMALE
                 age = int(age)
                 paths.append(path)
                 genders.append(gender)
@@ -308,12 +313,12 @@ if __name__ == "__main__":
     if params.source == "wiki":
         WikiProc(params.input_path, params.dest, overwrite=True).process(nums=-1)
     elif params.source == "imdb":
-        ImdbProc(params.input_path, params.dest,  overwrite=True).process(nums=-1)
+        ImdbProc(params.input_path, params.dest, overwrite=True).process(nums=-1)
     elif params.source == "asia":
-        AsiaProc(params.input_path, params.dest,  overwrite=True).process(nums=-1)
+        AsiaProc(params.input_path, params.dest, overwrite=True).process(nums=-1)
     elif params.source == "utk":
-        UTKProc(params.input_path, params.dest,  overwrite=True).process(nums=-1)
+        UTKProc(params.input_path, params.dest, overwrite=True).process(nums=-1)
     elif params.source == "afad":
-        AFADProc(params.input_path, params.dest,  overwrite=True).process(nums=-1)
+        AFADProc(params.input_path, params.dest, extra_padding=100, overwrite=True).process(nums=-1)
     else:
         raise Exception("fatal source")
