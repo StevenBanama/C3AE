@@ -17,6 +17,9 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
     - 3.add Mish6, GeM, Smooth label and so on.
     - 4.add utk, afad, asia dataset
     - 5.add tflite freezing
+- 2020-8 fixed bugs and add fixed-precision model
+       1. remove nan weights
+       2. add -fp16
 
 ### Part1 age branch
 
@@ -36,6 +39,7 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 | our implement v4 | asia |age: 5.83 gender 0.955 | -- | --| ./model/c3ae_model_v2_117_5.830443-0.955 |
 | our implement v4 | asia+utk | -- | age: 5.2 gender 0.967 | --| ./model/c3ae_model_v2_91_5.681206-0.949 |
 | our implement v4 | asia+utk+afad |age: 5.9 gender 0.9234 | age: 5.789  gender: 0.9491 | age: 3.61 gender: 0.9827| ./model/c3ae_model_v2_151_4.301724-0.962|
+| our implement v4 | white-norm asia+utk+afad |age: 6.0 gender 0.97 | age: 5.6  gender: 0.942 | age: 3.72 gender: 0.987| ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973|
 
 cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
 
