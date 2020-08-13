@@ -44,7 +44,7 @@ Triple-Boxes show much influence with different dataset, meanwhile the distribut
 cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
 
  **You can change weights of loss to improve age mae, [1, 20, 20].
->> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_151_4.301724-0.962 -test 
+>> python nets/C3AE_expand.py --white  -se --source "afad" -gpu -m "fp16_white_se" -p ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973 -fp16 -test 
 
 ## structs
    - assets 
@@ -70,9 +70,9 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
 ## test
  ### age and gender branch(only for py3 and tensorflow2+)
  - for image
-   >>> python nets/test.py -g -se -i assets/timg.jpg -m ./model/c3ae_model_v2_151_4.301724-0.962
+   >>> python nets/test.py -g -white -se -i assets/timg.jpg -m ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973
  - for video
-   >>> python nets/test.py -g -v -se -m ./model/c3ae_model_v2_151_4.301724-0.962
+   >>> python nets/test.py -g -white -v -se -m ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973
 
  ### age branch
  - for image
@@ -101,10 +101,10 @@ cation: Gender annotaion of utk is opposite to wiki/imdb/asia.
     with se-net and white-norm (better result)
     >>> python C3AE.py -gpu -p c3ae_v16.h5 -s c3ae_v16.h5 --source imdb -w 10 -white -se
     for gender and age prediction:
-    >>> python nets/C3AE_expand.py -se --source "afad" -gpu -p ./model/c3ae_model_v2_92_4.437156-0.963 
+    >>> python nets/C3AE_expand.py -se -white --source "afad" -gpu -fp16 -p ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973 
     
 ## freeze tflite
-    python nets/C3AE_expand.py -se --source "asia" -gpu -p  ./model/c3ae_model_v2_92_4.437156-0.963 -fz
+    python nets/C3AE_expand.py -se -white --source "asia" -gpu -fp16 -p ./model/c3ae_model_v2_fp16_white_se_132_4.208622-0.973 -fz
 
 ## DETECT: 
    [mtcnn] (https://github.com/YYuanAnyVision/mxnet_mtcnn_face_detection):  detect\align\random erasing \
