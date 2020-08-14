@@ -18,8 +18,8 @@ This is a unofficial keras implements of c3ae for age estimation. welcome to dis
     - 4.add utk, afad, asia dataset
     - 5.add tflite freezing
 - 2020-8 fixed bugs and add fixed-precision model
-       1. remove nan weights
-       2. add -fp16
+    -  1. remove nan weights (it may case predict as unpredict)
+    -  2. add -fp16
 
 ### Part1 age branch
 
