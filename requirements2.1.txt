@@ -1,7 +1,7 @@
 absl-py==0.7.1
 appdirs==1.4.3
 astor==0.7.1
-bleach==1.5.0
+bleach==3.3.0
 cachetools==3.1.1
 certifi==2019.9.11
 chardet==3.0.4
