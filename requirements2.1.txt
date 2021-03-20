@@ -30,7 +30,7 @@ html5lib==0.9999999
 idna==2.8
 itsdangerous==1.1.0
 jieba==0.42.1
-Jinja2==2.10.1
+Jinja2==2.11.3
 joblib==0.13.2
 Keras==2.3.0
 Keras-Applications==1.0.8
