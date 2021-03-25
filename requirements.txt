@@ -81,7 +81,7 @@ python-dateutil==2.7.3
 python-gflags==3.1.2
 pytz==2018.5
 PyWavelets==0.5.2
-PyYAML==3.13
+PyYAML==5.4
 pyzmq==17.1.2
 qtconsole==4.4.3
 requests==2.18.4
