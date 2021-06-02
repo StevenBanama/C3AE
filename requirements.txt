@@ -110,7 +110,7 @@ tqdm==4.23.4
 traitlets==4.3.2
 typing==3.6.6
 typing-extensions==3.6.6
-urllib3==1.22
+urllib3==1.26.5
 uuid==1.30
 wcwidth==0.1.7
 Werkzeug==0.14.1
