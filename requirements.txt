@@ -27,7 +27,7 @@ glog==0.3.1
 graphviz==0.8.4
 grpcio==1.13.0
 h5py==2.9.0
-html5lib==0.9999999
+html5lib==0.99999999
 idna==2.6
 imutils==0.4.6
 ipaddress==1.0.22
